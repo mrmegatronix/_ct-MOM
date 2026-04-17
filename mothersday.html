@@ -161,12 +161,41 @@
             color: var(--text-dark);
             background: rgba(255,255,255,0.8);
             z-index: 20;
-        }
-        .logo-seal img {
-            width: 60px;
-            margin-bottom: 5px;
+        /* QR Code Styling */
+        .qr-container {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
         }
 
+        .qr-frame {
+            background: white;
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(168, 28, 46, 0.15);
+            border: 2px solid var(--rose-red);
+            transition: transform 0.3s ease;
+        }
+
+        .qr-frame:hover {
+            transform: scale(1.05);
+        }
+
+        .qr-frame img {
+            display: block;
+            width: 180px;
+            height: 180px;
+        }
+
+        .qr-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--rose-red);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
@@ -189,7 +218,14 @@
             <div class="content">
                 <h1>Celebration</h1>
                 <div class="subtext">Mother's Day menu to come.</div>
-                <div class="subtext">Booking essential.</div>
+                <div class="subtext" style="font-weight: 600;">Booking essential.</div>
+                
+                <div class="qr-container">
+                    <div class="qr-label">Scan to Book Your Table</div>
+                    <div class="qr-frame">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https%3A%2F%2Fbookings.nowbookit.com%2F%3Faccountid%3Dd7034cd3-cfde-4556-a98c-ea943ec35ef4%26venueid%3D13703%26theme%3Dlight%26colors%3Dhex%2C000000" alt="Booking QR Code">
+                    </div>
+                </div>
             </div>
         </div>
 
