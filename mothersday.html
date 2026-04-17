@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mother's Day Celebration - Coasters Tavern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rose-red: #A81C2E;
+            --soft-pink: #FFF0F5;
+            --cream: #FFFAF0;
+            --text-dark: #4A0E0E;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--cream);
+            color: var(--text-dark);
+        }
+
+        /* Floral Background Decoration */
+        .floral-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 0;
+        }
+
+        /* Top Floral Border */
+        .floral-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 15vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+            display: flex;
+            justify-content: center;
+            z-index: 5;
+        }
+        .floral-top::before {
+            content: '🌸 🌺 🌸 🌺 🌸 🌺 🌸 🌺 🌸';
+            font-size: 2rem;
+            filter: grayscale(0.2) opacity(0.6);
+            letter-spacing: 1rem;
+            padding-top: 1rem;
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Slideshow Container */
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(168, 28, 46, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 800px;
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 8rem;
+            margin: 0;
+            color: var(--rose-red);
+            line-height: 1;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 300;
+            margin: 1.5rem 0;
+            color: var(--text-dark);
+            max-width: 600px;
+        }
+
+        .subtext {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin: 1rem 0;
+            font-weight: 400;
+            color: var(--text-dark);
+        }
+
+        .highlight {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--rose-red);
+            margin-top: 2rem;
+        }
+
+        /* Logo Placeholder */
+        .logo-seal {
+            position: absolute;
+            bottom: 3rem;
+            right: 3rem;
+            width: 120px;
+            height: 120px;
+            border: 2px solid var(--text-dark);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dark);
+            background: rgba(255,255,255,0.8);
+            z-index: 20;
+        }
+        .logo-seal img {
+            width: 60px;
+            margin-bottom: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="floral-bg"></div>
+    <div class="floral-top"></div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="slideshow-container">
+        <!-- Slide 1: Main Callout -->
+        <div class="slide active">
+            <div class="content">
+                <h1>Mother's Day</h1>
+                <h2>Let's honor the women who loves us unconditionally!</h2>
+            </div>
+        </div>
+
+        <!-- Slide 2: Menu & Booking -->
+        <div class="slide">
+            <div class="content">
+                <h1>Celebration</h1>
+                <div class="subtext">Mother's Day menu to come.</div>
+                <div class="subtext">Booking essential.</div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Prize -->
+        <div class="slide">
+            <div class="content">
+                <h1>Win a Hamper</h1>
+                <div class="subtext">All Mums who dine in go into the draw</div>
+                <div class="highlight">To win a Mother's Day Hamper!</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="logo-seal">
+        <div style="font-size: 0.6rem;">Est.</div>
+        <div style="font-weight: 800; font-size: 0.9rem;">COASTERS</div>
+        <div style="font-size: 0.6rem;">TAVERN</div>
+    </div>
+
+    <script>
+        // --- Slideshow Logic ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+            
+            // Fire a burst of flowers every time the slide changes
+            createConfettiBurst();
+        }
+
+        setInterval(nextSlide, 8000); // Slower transition for elegance
+
+
+        // --- Flower Confetti Logic ---
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const flowers = ['💐', '🌸', '🌺', '🌷', '🌹', '🌻'];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height; // Initial spread
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -50;
+                this.char = flowers[Math.floor(Math.random() * flowers.length)];
+                this.size = Math.random() * 20 + 20;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 1.5 + 1;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 2 - 1;
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.y / 50) * 0.5; // Slight sway
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height + 50) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.globalAlpha = this.opacity;
+                ctx.font = `${this.size}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.char, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        function createConfettiBurst() {
+            for (let i = 0; i < 15; i++) {
+                const p = new Particle();
+                p.y = -50;
+                p.speedY += 3;
+                particles.push(p);
+                // Remove extra particles after a while to keep performance
+                setTimeout(() => {
+                    const idx = particles.indexOf(p);
+                    if(idx > -1) particles.splice(idx, 1);
+                }, 10000);
+            }
+        }
+
+        initParticles();
+        animate();
+    </script>
+</body>
+</html>
