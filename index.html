@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mother's Day Celebration - Coasters Tavern</title>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
     <style>
         :root {
-            --rose-red: #A81C2E;
-            --soft-pink: #FFF0F5;
-            --cream: #FFFAF0;
-            --text-dark: #4A0E0E;
+            --rose-red: var(--cfg-primary, #A81C2E);
+            --soft-pink: var(--cfg-soft-pink, #FFF0F5);
+            --cream: var(--cfg-cream, #FFFAF0);
+            --text-dark: var(--cfg-text-dark, #4A0E0E);
+            --glow: var(--cfg-glow, rgba(168, 28, 46, 0.4));
         }
 
         body, html {
@@ -107,7 +109,36 @@
             backdrop-filter: blur(5px);
             border: 1px solid rgba(168, 28, 46, 0.2);
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            max-width: 800px;
+            max-width: 85%;
+            width: fit-content;
+        }
+
+        .slide-overlay-img {
+            max-width: 70%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+            border: 5px solid white;
+        }
+
+        /* Progress Bar */
+        #progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: rgba(168, 28, 46, 0.05);
+            z-index: 100;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--rose-red);
+            box-shadow: 0 0 10px var(--glow);
+            transition: width 0.1s linear;
         }
 
         h1 {
@@ -205,40 +236,16 @@
     <div class="floral-top"></div>
     <canvas id="confetti-canvas"></canvas>
 
-    <div class="slideshow-container">
-        <!-- Slide 1: Main Callout -->
+    <div class="slideshow-container" id="slides-wrapper">
+        <!-- Slides will be injected here -->
         <div class="slide active">
             <div class="content">
-                <h1>Mother's Day</h1>
-                <h2>Let's honor the women who loves us unconditionally!</h2>
-            </div>
-        </div>
-
-        <!-- Slide 2: Menu & Booking -->
-        <div class="slide">
-            <div class="content">
-                <h1>Celebration</h1>
-                <div class="subtext">Mother's Day menu to come.</div>
-                <div class="subtext" style="font-weight: 600;">Booking essential.</div>
-                
-                <div class="qr-container">
-                    <div class="qr-label">Scan to Book Your Table</div>
-                    <div class="qr-frame">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https%3A%2F%2Fbookings.nowbookit.com%2F%3Faccountid%3Dd7034cd3-cfde-4556-a98c-ea943ec35ef4%26venueid%3D13703%26theme%3Dlight%26colors%3Dhex%2C000000" alt="Booking QR Code">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 3: Prize -->
-        <div class="slide">
-            <div class="content">
-                <h1>Win a Hamper</h1>
-                <div class="subtext">All Mums who dine in go into the draw</div>
-                <div class="highlight">To win a Mother's Day Hamper!</div>
+                <h1>Loading...</h1>
+                <h2>Mother's Day Celebration</h2>
             </div>
         </div>
     </div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
 
     <div class="logo-seal">
         <div style="font-size: 0.6rem;">Est.</div>
@@ -247,21 +254,204 @@
     </div>
 
     <script>
+        // --- Security Helpers ---
+        function sanitize(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        }
+        function safeUrl(url) {
+            if (!url) return '';
+            return String(url).trim();
+        }
+
+        // --- State ---
+        let state = {
+            slides: [],
+            currentSlideIdx: 0,
+            isPaused: false,
+            disabledSlides: []
+        };
+
+        // --- DOM Elements ---
+        const slidesWrapper = document.getElementById('slides-wrapper');
+        const progressBar = document.getElementById('progress-bar');
+
+        // --- Broadcast Channel setup ---
+        const bc = new BroadcastChannel('mom_sync');
+        bc.onmessage = (event) => {
+            const data = event.data;
+            if (data.type === 'STATE_UPDATE') {
+                updateState(data.payload);
+            }
+            if (data.type === 'SLIDE_CMD') {
+                handleSlideCmd(data.payload.cmd);
+            }
+            if (data.type === 'CONFETTI') {
+                createConfettiBurst();
+            }
+        };
+
+        function handleSlideCmd(cmd) {
+            if (cmd === 'next') nextSlide();
+            if (cmd === 'prev') prevSlide();
+            if (cmd === 'toggle') toggleSlidePlay();
+        }
+
+        function updateState(newState) {
+            state = { ...state, ...newState };
+            if (newState.slides || newState.disabledSlides) {
+                renderSlides();
+            }
+            localStorage.setItem('mom_state', JSON.stringify(state));
+        }
+
+        function toggleSlidePlay() {
+            state.isPaused = !state.isPaused;
+            if (state.isPaused) {
+                clearInterval(slideInterval);
+                clearInterval(progressInterval);
+            } else {
+                startSlideTimer(30000); // Default resume
+            }
+        }
+
         // --- Slideshow Logic ---
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide');
+        let slideInterval;
+        let progressInterval;
 
         function nextSlide() {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
+            const slides = document.querySelectorAll('.slide');
+            if(slides.length <= 1) return;
             
-            // Fire a burst of flowers every time the slide changes
+            slides[state.currentSlideIdx].classList.remove('active');
+            state.currentSlideIdx = (state.currentSlideIdx + 1) % slides.length;
+            slides[state.currentSlideIdx].classList.add('active');
+            
+            const dur = parseInt(slides[state.currentSlideIdx].getAttribute('data-duration')) || 8000;
+            startSlideTimer(dur);
             createConfettiBurst();
         }
 
-        setInterval(nextSlide, 8000); // Slower transition for elegance
+        function prevSlide() {
+            const slides = document.querySelectorAll('.slide');
+            if(slides.length <= 1) return;
+            
+            slides[state.currentSlideIdx].classList.remove('active');
+            state.currentSlideIdx = (state.currentSlideIdx + slides.length - 1) % slides.length;
+            slides[state.currentSlideIdx].classList.add('active');
+            
+            const dur = parseInt(slides[state.currentSlideIdx].getAttribute('data-duration')) || 8000;
+            startSlideTimer(dur);
+        }
 
+        function startSlideTimer(duration) {
+            clearInterval(slideInterval);
+            clearInterval(progressInterval);
+            
+            let start = Date.now();
+            progressBar.style.width = '0%';
+            
+            progressInterval = setInterval(() => {
+                let elapsed = Date.now() - start;
+                let percent = (elapsed / duration) * 100;
+                progressBar.style.width = Math.min(percent, 100) + '%';
+            }, 50);
+
+            if (state.isPaused) return;
+
+            slideInterval = setInterval(() => {
+                if (state.isPaused) return;
+                nextSlide();
+            }, duration);
+        }
+
+        function renderSlides() {
+            const visibleSlides = state.slides.filter(s => !(state.disabledSlides || []).includes(s.title));
+            if (visibleSlides.length === 0) {
+                slidesWrapper.innerHTML = '<div class="slide active"><div class="content"><h1>Welcome</h1><h2>Preparing Celebration...</h2></div></div>';
+                return;
+            }
+
+            slidesWrapper.innerHTML = visibleSlides.map((slide, i) => {
+                const bgImg = safeUrl(slide.backgroundImage);
+                const overlayImg = safeUrl(slide.overlayImage);
+                const bgStyle = bgImg ? `background-image: url('${bgImg}'); background-size: cover; background-position: center;` : '';
+                
+                return `
+                    <div class="slide ${i === state.currentSlideIdx ? 'active' : ''}" style="${bgStyle}" data-duration="${slide.duration || 8000}">
+                        ${bgImg ? '<div class="slide-image-overlay"></div>' : ''}
+                        <div class="content" style="position: relative; z-index: 10;">
+                            ${overlayImg ? `<img src="${overlayImg}" class="slide-overlay-img">` : ''}
+                            ${slide.title ? `<h1>${sanitize(slide.title)}</h1>` : ''}
+                            ${slide.subtitle ? `<h2>${sanitize(slide.subtitle)}</h2>` : ''}
+                            ${slide.type === 'qr' ? `
+                                <div class="qr-container">
+                                    <div class="qr-label">Scan to Book</div>
+                                    <div class="qr-frame">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.bubbleText || 'https://coasters.co.nz')}" alt="QR Code">
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (state.currentSlideIdx >= visibleSlides.length) state.currentSlideIdx = 0;
+            const currentDur = visibleSlides[state.currentSlideIdx]?.duration || 8000;
+            startSlideTimer(currentDur);
+        }
+
+        // --- Google Sheets Sync ---
+        function splitCSVLine(line) {
+            const parts = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) {
+                    parts.push(current.trim());
+                    current = '';
+                } else current += char;
+            }
+            parts.push(current.trim());
+            return parts;
+        }
+
+        function parseSlidesCSV(text) {
+            const rows = text.split(/\r?\n/).filter(line => line.trim());
+            if (rows.length < 2) return [];
+
+            return rows.slice(1).map(line => {
+                const parts = splitCSVLine(line);
+                const clean = parts.map(p => p.replace(/^"|"$/g, '').trim());
+                return {
+                    title: clean[0],
+                    subtitle: clean[1] || '',
+                    type: (clean[2] || 'normal').toLowerCase(),
+                    duration: parseInt(clean[3]) || 8000,
+                    backgroundImage: clean[4] || '',
+                    overlayImage: clean[5] || '',
+                    bubbleText: clean[6] || ''
+                };
+            }).filter(s => s.title || s.subtitle);
+        }
+
+        async function fetchAndApplySlides() {
+            const url = window.MOM_CONFIG.GSHEETS_URL;
+            if(!url) return;
+            try {
+                const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+                const csv = await res.text();
+                const slides = parseSlidesCSV(csv);
+                if (slides.length > 0) {
+                    updateState({ slides });
+                }
+            } catch (e) {
+                console.error('[MOM] Failed to fetch slides:', e);
+            }
+        }
 
         // --- Flower Confetti Logic ---
         const canvas = document.getElementById('confetti-canvas');
@@ -280,7 +470,7 @@
         class Particle {
             constructor() {
                 this.reset();
-                this.y = Math.random() * canvas.height; // Initial spread
+                this.y = Math.random() * canvas.height;
             }
 
             reset() {
@@ -297,7 +487,7 @@
 
             update() {
                 this.y += this.speedY;
-                this.x += this.speedX + Math.sin(this.y / 50) * 0.5; // Slight sway
+                this.x += this.speedX + Math.sin(this.y / 50) * 0.5;
                 this.rotation += this.rotationSpeed;
                 if (this.y > canvas.height + 50) {
                     this.reset();
@@ -338,7 +528,6 @@
                 p.y = -50;
                 p.speedY += 3;
                 particles.push(p);
-                // Remove extra particles after a while to keep performance
                 setTimeout(() => {
                     const idx = particles.indexOf(p);
                     if(idx > -1) particles.splice(idx, 1);
@@ -346,8 +535,31 @@
             }
         }
 
-        initParticles();
-        animate();
+        // --- Init ---
+        async function init() {
+            const cfg = window.MOM_CONFIG;
+            if (cfg) {
+                const root = document.documentElement;
+                if (cfg.COLORS.primary) root.style.setProperty('--cfg-primary', cfg.COLORS.primary);
+                if (cfg.COLORS.softPink) root.style.setProperty('--cfg-soft-pink', cfg.COLORS.softPink);
+                if (cfg.COLORS.cream) root.style.setProperty('--cfg-cream', cfg.COLORS.cream);
+                if (cfg.COLORS.textDark) root.style.setProperty('--cfg-text-dark', cfg.COLORS.textDark);
+                if (cfg.COLORS.glow) root.style.setProperty('--cfg-glow', cfg.COLORS.glow);
+            }
+
+            const stored = localStorage.getItem('mom_state');
+            if (stored) {
+                try { updateState(JSON.parse(stored)); } catch(e){}
+            }
+
+            await fetchAndApplySlides();
+            setInterval(fetchAndApplySlides, cfg.SYNC_INTERVAL_MS || 300000);
+
+            initParticles();
+            animate();
+        }
+
+        init();
     </script>
 </body>
 </html>

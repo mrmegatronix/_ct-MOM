@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mother's Day - Admin Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        :root {
+            --rose-red: var(--cfg-primary, #A81C2E);
+            --soft-pink: var(--cfg-soft-pink, #FFF0F5);
+            --cream: var(--cfg-cream, #FFFAF0);
+            --text-dark: var(--cfg-text-dark, #4A0E0E);
+            --surface: #ffffff;
+            --border: rgba(168, 28, 46, 0.1);
+        }
+
+        body {
+            background-color: var(--cream);
+            color: var(--text-dark);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .admin-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 15px 45px rgba(168, 28, 46, 0.1);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Floral accents */
+        .admin-card::before {
+            content: '🌸';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 4rem;
+            opacity: 0.1;
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.5rem;
+            color: var(--rose-red);
+            margin: 0 0 0.5rem 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-dark);
+            opacity: 0.7;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .btn {
+            background: white;
+            border: 2px solid var(--rose-red);
+            color: var(--rose-red);
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: var(--rose-red);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(168, 28, 46, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--rose-red);
+            color: white;
+            grid-column: span 3;
+            margin-top: 0.5rem;
+        }
+
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Slide List */
+        .slide-list {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .slide-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            gap: 1rem;
+        }
+
+        .slide-item:last-child {
+            border-bottom: none;
+        }
+
+        .slide-info {
+            flex: 1;
+        }
+
+        .slide-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .slide-meta {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--rose-red);
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--rose-red);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        #status {
+            position: fixed;
+            top: 2rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            background: var(--rose-red);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(168, 28, 46, 0.3);
+            transform: translateY(-100px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        #status.show {
+            transform: translateY(0);
+        }
+
+        /* PIN Overlay */
+        #pin-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--cream);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .pin-input {
+            font-size: 2rem;
+            padding: 1rem;
+            width: 200px;
+            border: 2px solid var(--rose-red);
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+            background: white;
+            color: var(--rose-red);
+            letter-spacing: 0.5em;
+        }
+
+        .pin-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(168, 28, 46, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="status">Status message</div>
+
+    <!-- PIN Access -->
+    <div id="pin-overlay">
+        <h1>Admin Access</h1>
+        <p class="subtitle">Secure Entrance</p>
+        <input type="password" class="pin-input" id="pin-input" maxlength="4" placeholder="••••">
+        <button class="btn btn-primary" style="width: 200px;" onclick="checkPin()">Unlock Panel</button>
+        <p id="pin-error" style="color: var(--rose-red); font-size: 0.8rem; margin-top: 1rem; display: none;">Invalid PIN. Try again.</p>
+    </div>
+
+    <div class="admin-card">
+        <h1>Mother's Day</h1>
+        <div class="subtitle">Admin Control Panel</div>
+
+        <div class="section">
+            <h3>🎮 Slide Navigation</h3>
+            <div class="btn-group">
+                <button class="btn" onclick="sendCommand('prev')">
+                    <span class="btn-icon">⏮</span>
+                    <span>Previous</span>
+                </button>
+                <button class="btn" onclick="sendCommand('toggle')" id="play-pause-btn">
+                    <span class="btn-icon">⏸</span>
+                    <span id="play-pause-text">Pause</span>
+                </button>
+                <button class="btn" onclick="sendCommand('next')">
+                    <span class="btn-icon">⏭</span>
+                    <span>Next</span>
+                </button>
+                <button class="btn btn-primary" onclick="bc.postMessage({type: 'CONFETTI'})">
+                    <span class="btn-icon">🌸</span>
+                    <span>Trigger Flower Burst</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0;">📋 Slide Management</h3>
+                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.7rem;" onclick="syncFromSheets()">🔄 SYNC NOW</button>
+            </div>
+            <div class="slide-list" id="slide-list">
+                <!-- Slides will be listed here -->
+                <div style="padding: 2rem; text-align: center; opacity: 0.5;">Loading slides...</div>
+            </div>
+            <button class="btn btn-primary" onclick="saveVisibility()" style="margin-top: 1rem;">💾 Apply Visibility Changes</button>
+        </div>
+
+        <div class="section" style="text-align: center;">
+            <a href="index.html" target="_blank" style="color: var(--rose-red); text-decoration: none; font-size: 0.8rem; font-weight: 600;">Open TV Display ↗</a>
+        </div>
+    </div>
+
+    <script>
+        const bc = new BroadcastChannel('mom_sync');
+        let isPaused = false;
+
+        // Security
+        function checkPin() {
+            const input = document.getElementById('pin-input');
+            const stored = localStorage.getItem('mom_pin') || '1234';
+            if (input.value === stored) {
+                document.getElementById('pin-overlay').style.display = 'none';
+                sessionStorage.setItem('mom_authed', 'true');
+            } else {
+                document.getElementById('pin-error').style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        if (sessionStorage.getItem('mom_authed') === 'true') {
+            document.getElementById('pin-overlay').style.display = 'none';
+        }
+
+        // Messaging
+        function sendCommand(cmd) {
+            bc.postMessage({ type: 'SLIDE_CMD', payload: { cmd } });
+            if (cmd === 'toggle') {
+                isPaused = !isPaused;
+                document.getElementById('play-pause-text').innerText = isPaused ? 'Resume' : 'Pause';
+                document.getElementById('play-pause-btn').querySelector('.btn-icon').innerText = isPaused ? '▶' : '⏸';
+            }
+            showStatus('Command Sent: ' + cmd);
+        }
+
+        function showStatus(msg) {
+            const el = document.getElementById('status');
+            el.innerText = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
+        // Sync and Management
+        async function syncFromSheets() {
+            showStatus('Fetching latest from Sheets...');
+            const url = window.MOM_CONFIG.GSHEETS_URL;
+            try {
+                const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+                const csv = await res.text();
+                // We'll reuse the parsing logic here or just tell index to refresh
+                bc.postMessage({ type: 'CONFETTI' }); // feedback
+                showStatus('Sync successful! Refreshing list...');
+                // Give index.html a moment to fetch if it was also open, or just trigger it
+                setTimeout(renderSlideList, 1000);
+            } catch (e) {
+                showStatus('Error: Failed to sync');
+            }
+        }
+
+        function renderSlideList() {
+            const stored = localStorage.getItem('mom_state');
+            if (!stored) return;
+            const state = JSON.parse(stored);
+            const container = document.getElementById('slide-list');
+            const disabled = state.disabledSlides || [];
+
+            container.innerHTML = state.slides.map((s, i) => `
+                <div class="slide-item">
+                    <div class="slide-info">
+                        <div class="slide-title">${s.title || '(No Title)'}</div>
+                        <div class="slide-meta">${s.type} • ${s.duration}ms</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="check-${i}" value="${s.title}" ${disabled.includes(s.title) ? '' : 'checked'}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            `).join('');
+        }
+
+        function saveVisibility() {
+            const boxes = document.querySelectorAll('.slide-item input[type="checkbox"]');
+            const disabled = [];
+            boxes.forEach(box => {
+                if (!box.checked) disabled.push(box.value);
+            });
+
+            const stored = localStorage.getItem('mom_state');
+            let state = stored ? JSON.parse(stored) : {};
+            state.disabledSlides = disabled;
+            localStorage.setItem('mom_state', JSON.stringify(state));
+
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { disabledSlides: disabled } });
+            showStatus('Visibility Applied to Display!');
+        }
+
+        // Initial render
+        renderSlideList();
+        setInterval(renderSlideList, 5000); // Keep in sync with index.html state
+    </script>
+</body>
+</html>
