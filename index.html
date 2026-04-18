@@ -505,6 +505,10 @@
         }
 
         async function fetchAndApplySlides() {
+            if (localStorage.getItem('mom_sync_locked') === 'true') {
+                console.log('[MOM] Sync skipped: Local CMS locked.');
+                return;
+            }
             const url = window.MOM_CONFIG.GSHEETS_URL;
             if(!url) return;
             try {

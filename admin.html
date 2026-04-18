@@ -333,6 +333,18 @@
                     <option value="avatar">Avatar / Speech Bubble</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label>Background Image URL</label>
+                <input type="text" id="edit-bg-img" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Overlay Image URL</label>
+                <input type="text" id="edit-overlay-img" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Bubble Text / QR Data</label>
+                <textarea id="edit-bubble" rows="3" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;"></textarea>
+            </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                 <button class="btn" style="flex: 1;" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" style="flex: 1;" onclick="saveEdit()">Save Changes</button>
@@ -352,6 +364,14 @@
     <div class="admin-card">
         <h1>Mother's Day</h1>
         <div class="subtitle">Admin Control Panel</div>
+
+        <div class="section" style="background: var(--rose-red-light); padding: 1rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 0.9rem; font-weight: 600;">🔒 Lock Local Edits (Stop Sync)</div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="sync-lock-toggle" onchange="toggleSyncLock()">
+                <span class="slider"></span>
+            </label>
+        </div>
 
         <div class="section">
             <h3>🎮 Slide Navigation</h3>
@@ -378,7 +398,10 @@
         <div class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3 style="margin: 0;">📋 Slide Management</h3>
-                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.7rem;" onclick="syncFromSheets()">🔄 SYNC NOW</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-sm" onclick="addNewSlide()" style="background: var(--rose-red); color: white;">+ ADD SLIDE</button>
+                    <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.7rem;" id="sync-btn" onclick="syncFromSheets()">🔄 SYNC NOW</button>
+                </div>
             </div>
             <div style="font-size: 0.75rem; opacity: 0.6; margin-bottom: 1rem;">Click ✏️ to override values locally for this browser session.</div>
             <div class="slide-list" id="slide-list">
@@ -440,7 +463,16 @@
         }
 
         // Sync and Management
+        function toggleSyncLock() {
+            const locked = document.getElementById('sync-lock-toggle').checked;
+            localStorage.setItem('mom_sync_locked', locked);
+            document.getElementById('sync-btn').disabled = locked;
+            document.getElementById('sync-btn').style.opacity = locked ? '0.3' : '1';
+            showStatus(locked ? 'Mode: LOCAL CMS' : 'Mode: CLOUD SYNC');
+        }
+
         async function syncFromSheets() {
+            if (localStorage.getItem('mom_sync_locked') === 'true') return;
             showStatus('Fetching latest from Sheets...');
             const url = window.MOM_CONFIG.GSHEETS_URL;
             try {
@@ -482,7 +514,8 @@
                             <div class="slide-meta">${ov.type || s.type} • ${ov.duration || s.duration}ms</div>
                         </div>
                         <div class="slide-actions">
-                            <button class="btn btn-sm" onclick="openEdit(${i})" title="Edit Locally">✏️</button>
+                            <button class="btn btn-sm" onclick="openEdit(${i})" title="Edit">✏️</button>
+                            <button class="btn btn-sm" onclick="deleteSlide(${i})" title="Delete" style="color: red; border-color: rgba(255,0,0,0.2);">🗑️</button>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="check-${i}" value="${s.title}" ${disabled.includes(s.title) ? '' : 'checked'}>
                                 <span class="slider"></span>
@@ -491,6 +524,36 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function addNewSlide() {
+            const stored = localStorage.getItem('mom_state');
+            const state = stored ? JSON.parse(stored) : { slides: [] };
+            const newSlide = {
+                title: 'New Slide ' + (state.slides.length + 1),
+                subtitle: 'Enter subtitle here',
+                type: 'normal',
+                duration: 8000,
+                backgroundImage: '',
+                overlayImage: '',
+                bubbleText: ''
+            };
+            state.slides.push(newSlide);
+            localStorage.setItem('mom_state', JSON.stringify(state));
+            renderSlideList();
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            showStatus('New slide added locally!');
+            openEdit(state.slides.length - 1);
+        }
+
+        function deleteSlide(index) {
+            if (!confirm('Are you sure you want to delete this slide locally?')) return;
+            const state = JSON.parse(localStorage.getItem('mom_state'));
+            state.slides.splice(index, 1);
+            localStorage.setItem('mom_state', JSON.stringify(state));
+            renderSlideList();
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            showStatus('Slide deleted!');
         }
 
         function moveSlide(index, direction) {
@@ -521,6 +584,9 @@
             document.getElementById('edit-subtitle').value = ov.subtitle || slide.subtitle || '';
             document.getElementById('edit-duration').value = ov.duration || slide.duration || 8000;
             document.getElementById('edit-type').value = ov.type || slide.type || 'normal';
+            document.getElementById('edit-bg-img').value = ov.backgroundImage || slide.backgroundImage || '';
+            document.getElementById('edit-overlay-img').value = ov.overlayImage || slide.overlayImage || '';
+            document.getElementById('edit-bubble').value = ov.bubbleText || slide.bubbleText || '';
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -533,21 +599,35 @@
             const state = JSON.parse(localStorage.getItem('mom_state'));
             const slide = state.slides[index];
             
-            const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
-            overrides[slide.title] = {
+            // To make this robust, we actually update the slide object itself if Sync is locked
+            const isLocked = localStorage.getItem('mom_sync_locked') === 'true';
+            
+            const newValues = {
                 title: document.getElementById('edit-title').value,
                 subtitle: document.getElementById('edit-subtitle').value,
                 duration: parseInt(document.getElementById('edit-duration').value),
-                type: document.getElementById('edit-type').value
+                type: document.getElementById('edit-type').value,
+                backgroundImage: document.getElementById('edit-bg-img').value,
+                overlayImage: document.getElementById('edit-overlay-img').value,
+                bubbleText: document.getElementById('edit-bubble').value
             };
+
+            if (isLocked) {
+                // Persistent edit to the slide itself
+                state.slides[index] = { ...slide, ...newValues };
+                localStorage.setItem('mom_state', JSON.stringify(state));
+                bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            } else {
+                // Session override
+                const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
+                overrides[slide.title] = newValues;
+                localStorage.setItem('mom_overrides', JSON.stringify(overrides));
+                bc.postMessage({ type: 'STATE_UPDATE', payload: { overrides } });
+            }
             
-            localStorage.setItem('mom_overrides', JSON.stringify(overrides));
             closeModal();
             renderSlideList();
-            showStatus('Slide overridden locally!');
-            
-            // Broadcast the update
-            bc.postMessage({ type: 'STATE_UPDATE', payload: { overrides } });
+            showStatus(isLocked ? 'Slide updated permanently!' : 'Slide overridden locally!');
         }
 
         function saveVisibility() {
@@ -567,8 +647,23 @@
         }
 
         // Initial render
+        const locked = localStorage.getItem('mom_sync_locked') === 'true';
+        document.getElementById('sync-lock-toggle').checked = locked;
+        document.getElementById('sync-btn').disabled = locked;
+        document.getElementById('sync-btn').style.opacity = locked ? '0.3' : '1';
+
         renderSlideList();
-        setInterval(renderSlideList, 5000); // Keep in sync with index.html state
+        setInterval(() => {
+            if (localStorage.getItem('mom_sync_locked') !== 'true') {
+                renderSlideList();
+            }
+        }, 5000);
+
+        function sanitize(str) {
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        }
     </script>
 </body>
 </html>
