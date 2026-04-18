@@ -169,6 +169,20 @@
             opacity: 0.6;
         }
 
+        .slide-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 0.4rem;
+            border-radius: 8px;
+            border-width: 1px;
+            font-size: 0.7rem;
+            min-width: 30px;
+        }
+
         .toggle-switch {
             position: relative;
             display: inline-block;
@@ -310,6 +324,15 @@
                 <label>Duration (ms)</label>
                 <input type="number" id="edit-duration">
             </div>
+            <div class="form-group">
+                <label>Slide Type</label>
+                <select id="edit-type" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                    <option value="normal">Normal</option>
+                    <option value="countdown">Countdown (May 10)</option>
+                    <option value="qr">QR Code</option>
+                    <option value="avatar">Avatar / Speech Bubble</option>
+                </select>
+            </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                 <button class="btn" style="flex: 1;" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" style="flex: 1;" onclick="saveEdit()">Save Changes</button>
@@ -447,21 +470,43 @@
                 
                 return `
                     <div class="slide-item">
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <button class="btn-sm" onclick="moveSlide(${i}, -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
+                            <button class="btn-sm" onclick="moveSlide(${i}, 1)" ${i === state.slides.length - 1 ? 'disabled' : ''}>▼</button>
+                        </div>
                         <div class="slide-info">
                             <div class="slide-title">
                                 ${sanitize(displayTitle)}
                                 ${ov.title ? '<span style="color:var(--rose-red); font-size:0.6rem;">(EDITED)</span>' : ''}
                             </div>
-                            <div class="slide-meta">${s.type} • ${ov.duration || s.duration}ms</div>
+                            <div class="slide-meta">${ov.type || s.type} • ${ov.duration || s.duration}ms</div>
                         </div>
-                        <button class="btn" style="padding: 0.4rem; border-radius: 8px; border-width: 1px;" onclick="openEdit(${i})" title="Edit Locally">✏️</button>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="check-${i}" value="${s.title}" ${disabled.includes(s.title) ? '' : 'checked'}>
-                            <span class="slider"></span>
-                        </label>
+                        <div class="slide-actions">
+                            <button class="btn btn-sm" onclick="openEdit(${i})" title="Edit Locally">✏️</button>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="check-${i}" value="${s.title}" ${disabled.includes(s.title) ? '' : 'checked'}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function moveSlide(index, direction) {
+            const stored = localStorage.getItem('mom_state');
+            if (!stored) return;
+            const state = JSON.parse(stored);
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= state.slides.length) return;
+            
+            const item = state.slides.splice(index, 1)[0];
+            state.slides.splice(newIndex, 0, item);
+            
+            localStorage.setItem('mom_state', JSON.stringify(state));
+            renderSlideList();
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            showStatus('Slide order updated!');
         }
 
         // Editing Logic
@@ -475,6 +520,7 @@
             document.getElementById('edit-title').value = ov.title || slide.title || '';
             document.getElementById('edit-subtitle').value = ov.subtitle || slide.subtitle || '';
             document.getElementById('edit-duration').value = ov.duration || slide.duration || 8000;
+            document.getElementById('edit-type').value = ov.type || slide.type || 'normal';
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -491,7 +537,8 @@
             overrides[slide.title] = {
                 title: document.getElementById('edit-title').value,
                 subtitle: document.getElementById('edit-subtitle').value,
-                duration: parseInt(document.getElementById('edit-duration').value)
+                duration: parseInt(document.getElementById('edit-duration').value),
+                type: document.getElementById('edit-type').value
             };
             
             localStorage.setItem('mom_overrides', JSON.stringify(overrides));
