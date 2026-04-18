@@ -24,7 +24,7 @@ window.MOM_CONFIG = {
     },
     
     // ── ASSETS ──────────────────────────────────────────────────────────
-    LOGO_PATH: '', // Optional logo override
+    LOGO_PATH: 'coasters-logo.png',
     AVATAR_FALLBACK: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&q=80&w=2000',
     CONFETTI_SYMBOLS: ['💐', '🌸', '🌺', '🌷', '🌹', '🌻'],
     
