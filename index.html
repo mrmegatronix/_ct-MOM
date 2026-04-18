@@ -163,6 +163,13 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             letter-spacing: 2px;
         }
+        .blink-colon {
+            animation: blinker 1s linear infinite;
+            margin: 0 5px;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
         .countdown-label {
             font-size: 1.2rem;
             text-transform: uppercase;
@@ -452,11 +459,13 @@
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hrs = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const mins = Math.floor((diff / (1000 * 60)) % 60);
-            return `${days} Days : ${String(hrs).padStart(2, '0')} Hours : ${String(mins).padStart(2, '0')} Min`;
+            
+            const colon = '<span class="blink-colon">:</span>';
+            return `${days} Days ${colon} ${String(hrs).padStart(2, '0')} Hours ${colon} ${String(mins).padStart(2, '0')} Min`;
         }
         setInterval(() => {
             const el = document.querySelector('.slide-countdown-timer');
-            if (el) el.innerText = calculateMOMCountdown();
+            if (el) el.innerHTML = calculateMOMCountdown();
         }, 1000);
 
         // --- Google Sheets Sync ---
