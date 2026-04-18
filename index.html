@@ -269,7 +269,8 @@
             slides: [],
             currentSlideIdx: 0,
             isPaused: false,
-            disabledSlides: []
+            disabledSlides: [],
+            overrides: {}
         };
 
         // --- DOM Elements ---
@@ -299,7 +300,7 @@
 
         function updateState(newState) {
             state = { ...state, ...newState };
-            if (newState.slides || newState.disabledSlides) {
+            if (newState.slides || newState.disabledSlides || newState.overrides) {
                 renderSlides();
             }
             localStorage.setItem('mom_state', JSON.stringify(state));
@@ -372,18 +373,25 @@
                 return;
             }
 
+            const overrides = state.overrides || {};
+
             slidesWrapper.innerHTML = visibleSlides.map((slide, i) => {
+                const ov = overrides[slide.title] || {};
+                const title = ov.title || slide.title || '';
+                const subtitle = ov.subtitle || slide.subtitle || '';
+                const duration = ov.duration || slide.duration || 8000;
+
                 const bgImg = safeUrl(slide.backgroundImage);
                 const overlayImg = safeUrl(slide.overlayImage);
                 const bgStyle = bgImg ? `background-image: url('${bgImg}'); background-size: cover; background-position: center;` : '';
                 
                 return `
-                    <div class="slide ${i === state.currentSlideIdx ? 'active' : ''}" style="${bgStyle}" data-duration="${slide.duration || 8000}">
+                    <div class="slide ${i === state.currentSlideIdx ? 'active' : ''}" style="${bgStyle}" data-duration="${duration}">
                         ${bgImg ? '<div class="slide-image-overlay"></div>' : ''}
                         <div class="content" style="position: relative; z-index: 10;">
                             ${overlayImg ? `<img src="${overlayImg}" class="slide-overlay-img">` : ''}
-                            ${slide.title ? `<h1>${sanitize(slide.title)}</h1>` : ''}
-                            ${slide.subtitle ? `<h2>${sanitize(slide.subtitle)}</h2>` : ''}
+                            ${title ? `<h1>${sanitize(title)}</h1>` : ''}
+                            ${subtitle ? `<h2>${sanitize(subtitle)}</h2>` : ''}
                             ${slide.type === 'qr' ? `
                                 <div class="qr-container">
                                     <div class="qr-label">Scan to Book</div>
@@ -398,7 +406,8 @@
             }).join('');
 
             if (state.currentSlideIdx >= visibleSlides.length) state.currentSlideIdx = 0;
-            const currentDur = visibleSlides[state.currentSlideIdx]?.duration || 8000;
+            const currentOv = overrides[visibleSlides[state.currentSlideIdx]?.title] || {};
+            const currentDur = currentOv.duration || visibleSlides[state.currentSlideIdx]?.duration || 8000;
             startSlideTimer(currentDur);
         }
 

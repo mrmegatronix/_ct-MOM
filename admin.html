@@ -14,6 +14,7 @@
             --text-dark: var(--cfg-text-dark, #4A0E0E);
             --surface: #ffffff;
             --border: rgba(168, 28, 46, 0.1);
+            --rose-red-light: rgba(168, 28, 46, 0.05);
         }
 
         body {
@@ -257,14 +258,64 @@
         }
 
         .pin-input:focus {
-            outline: none;
-            box-shadow: 0 0 20px rgba(168, 28, 46, 0.1);
+            outline: none;box-shadow: 0 0 20px rgba(168, 28, 46, 0.1);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
+        }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 20px; width: 90%; max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.3rem; opacity: 0.7; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;
+            font-family: inherit; box-sizing: border-box;
+        }
+
+        .template-box {
+            background: var(--rose-red-light);
+            border: 1px dashed var(--rose-red);
+            padding: 1rem;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
 
     <div id="status">Status message</div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family:'Great Vibes'; color: var(--rose-red); font-size: 2.5rem; margin-top: 0;">Edit Slide</h2>
+            <input type="hidden" id="edit-index">
+            <div class="form-group">
+                <label>Title Override</label>
+                <input type="text" id="edit-title">
+            </div>
+            <div class="form-group">
+                <label>Subtitle Override</label>
+                <input type="text" id="edit-subtitle">
+            </div>
+            <div class="form-group">
+                <label>Duration (ms)</label>
+                <input type="number" id="edit-duration">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn" style="flex: 1;" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" style="flex: 1;" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
 
     <!-- PIN Access -->
     <div id="pin-overlay">
@@ -306,11 +357,18 @@
                 <h3 style="margin: 0;">📋 Slide Management</h3>
                 <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.7rem;" onclick="syncFromSheets()">🔄 SYNC NOW</button>
             </div>
+            <div style="font-size: 0.75rem; opacity: 0.6; margin-bottom: 1rem;">Click ✏️ to override values locally for this browser session.</div>
             <div class="slide-list" id="slide-list">
                 <!-- Slides will be listed here -->
                 <div style="padding: 2rem; text-align: center; opacity: 0.5;">Loading slides...</div>
             </div>
-            <button class="btn btn-primary" onclick="saveVisibility()" style="margin-top: 1rem;">💾 Apply Visibility Changes</button>
+            <button class="btn btn-primary" onclick="saveVisibility()" style="margin-top: 1rem;">💾 Apply Changes to Display</button>
+        </div>
+
+        <div class="section">
+            <h3 style="margin: 0;">💡 GSheet Template Headers</h3>
+            <div class="template-box">Title, Subtitle, Type, Duration, BackgroundImg, OverlayImg, BubbleText</div>
+            <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 0.5rem;">Copy these headers to your Google Sheet to ensure correct mapping.</p>
         </div>
 
         <div class="section" style="text-align: center;">
@@ -381,19 +439,68 @@
             const state = JSON.parse(stored);
             const container = document.getElementById('slide-list');
             const disabled = state.disabledSlides || [];
+            const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
 
-            container.innerHTML = state.slides.map((s, i) => `
-                <div class="slide-item">
-                    <div class="slide-info">
-                        <div class="slide-title">${s.title || '(No Title)'}</div>
-                        <div class="slide-meta">${s.type} • ${s.duration}ms</div>
+            container.innerHTML = state.slides.map((s, i) => {
+                const ov = overrides[s.title] || {};
+                const displayTitle = ov.title || s.title || '(No Title)';
+                
+                return `
+                    <div class="slide-item">
+                        <div class="slide-info">
+                            <div class="slide-title">
+                                ${sanitize(displayTitle)}
+                                ${ov.title ? '<span style="color:var(--rose-red); font-size:0.6rem;">(EDITED)</span>' : ''}
+                            </div>
+                            <div class="slide-meta">${s.type} • ${ov.duration || s.duration}ms</div>
+                        </div>
+                        <button class="btn" style="padding: 0.4rem; border-radius: 8px; border-width: 1px;" onclick="openEdit(${i})" title="Edit Locally">✏️</button>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="check-${i}" value="${s.title}" ${disabled.includes(s.title) ? '' : 'checked'}>
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="check-${i}" value="${s.title}" ${disabled.includes(s.title) ? '' : 'checked'}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        // Editing Logic
+        function openEdit(index) {
+            const state = JSON.parse(localStorage.getItem('mom_state'));
+            const slide = state.slides[index];
+            const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
+            const ov = overrides[slide.title] || {};
+
+            document.getElementById('edit-index').value = index;
+            document.getElementById('edit-title').value = ov.title || slide.title || '';
+            document.getElementById('edit-subtitle').value = ov.subtitle || slide.subtitle || '';
+            document.getElementById('edit-duration').value = ov.duration || slide.duration || 8000;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        function saveEdit() {
+            const index = document.getElementById('edit-index').value;
+            const state = JSON.parse(localStorage.getItem('mom_state'));
+            const slide = state.slides[index];
+            
+            const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
+            overrides[slide.title] = {
+                title: document.getElementById('edit-title').value,
+                subtitle: document.getElementById('edit-subtitle').value,
+                duration: parseInt(document.getElementById('edit-duration').value)
+            };
+            
+            localStorage.setItem('mom_overrides', JSON.stringify(overrides));
+            closeModal();
+            renderSlideList();
+            showStatus('Slide overridden locally!');
+            
+            // Broadcast the update
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { overrides } });
         }
 
         function saveVisibility() {
