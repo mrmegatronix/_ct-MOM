@@ -277,12 +277,7 @@
     <canvas id="confetti-canvas"></canvas>
 
     <div class="slideshow-container" id="slides-wrapper">
-        <div class="slide active">
-            <div class="content">
-                <h1>Loading...</h1>
-                <h2>Mother's Day Celebration</h2>
-            </div>
-        </div>
+        <!-- Slides are injected here by init() -->
     </div>
     <div id="progress-container"><div id="progress-bar"></div></div>
 
@@ -402,7 +397,7 @@
         function renderSlides() {
             const visibleSlides = state.slides.filter(s => !(state.disabledSlides || []).includes(s.title));
             if (visibleSlides.length === 0) {
-                slidesWrapper.innerHTML = '<div class="slide active"><div class="content"><h1>Welcome</h1><h2>Preparing Celebration...</h2></div></div>';
+                slidesWrapper.innerHTML = '<div class="slide active"><div class="content"><h1>Welcome</h1><h2>Preparing Mother\'s Day Celebration...</h2></div></div>';
                 return;
             }
 
@@ -584,7 +579,7 @@
 
         function initParticles() {
             particles = [];
-            for (let i = 0; i < 60; i++) { // More particles
+            for (let i = 0; i < 30; i++) { // Restricted count for performance
                 particles.push(new Particle());
             }
         }
@@ -599,16 +594,15 @@
         }
 
         function createConfettiBurst() {
-            // High intensity burst
-            for (let i = 0; i < 30; i++) {
+            // Lighter burst
+            for (let i = 0; i < 15; i++) {
                 const p = new Particle(true);
-                p.speedY += 2;
+                p.speedY += 1.5;
                 particles.push(p);
-                // Gradually remove burst particles to keep performance
                 setTimeout(() => {
                     const idx = particles.indexOf(p);
                     if(idx > -1) particles.splice(idx, 1);
-                }, 8000);
+                }, 5000);
             }
         }
 

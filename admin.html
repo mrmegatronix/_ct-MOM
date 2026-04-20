@@ -301,6 +301,24 @@
             white-space: pre-wrap;
             margin-top: 1rem;
         }
+
+        /* PiP Styling */
+        .pip-toggle {
+            position: fixed; bottom: 30px; left: 30px; z-index: 5000;
+            background: var(--rose-red); color: white; border: none;
+            padding: 12px 24px; border-radius: 50px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(168, 28, 46, 0.3); font-size: 0.8rem;
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .pip-toggle:hover { transform: scale(1.05); }
+        .pip-window {
+            position: fixed; bottom: 90px; left: 30px; width: 350px; height: 200px;
+            background: #000; border: 2px solid var(--rose-red); border-radius: 15px;
+            z-index: 5000; overflow: hidden; display: none; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: pipIn 0.3s ease;
+        }
+        @keyframes pipIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .pip-window iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
@@ -420,7 +438,26 @@
         <div class="section" style="text-align: center;">
             <a href="index.html" target="_blank" style="color: var(--rose-red); text-decoration: none; font-size: 0.8rem; font-weight: 600;">Open TV Display ↗</a>
         </div>
+        
+        <!-- Navigation Hub -->
+        <nav class="nav-hub" style="margin-top: 1rem; display: flex; justify-content: center; gap: 20px; border-top: 1px solid var(--border); padding-top: 20px; flex-wrap: wrap;">
+            <a href="admin.html" class="nav-link" style="color: var(--rose-red); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--rose-red);">🛠 Admin</a>
+            <span style="color: var(--border)">|</span>
+            <a href="../_ct-MATRIX/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">MATRIX</a>
+            <a href="../_ct-MMR/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">MMR</a>
+            <a href="../__auto-dash/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Auto-Dash</a>
+            <a href="../__sec-DASH/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Sec-Dash</a>
+        </nav>
     </div>
+
+    <!-- PiP Elements -->
+    <div id="pip-window" class="pip-window">
+        <iframe id="pip-frame" src=""></iframe>
+    </div>
+    <button class="pip-toggle" onclick="togglePip()">
+        <span style="font-size: 1.2rem;">🖼️</span> 
+        <span>LIVE PREVIEW</span>
+    </button>
 
     <script>
         const bc = new BroadcastChannel('mom_sync');
@@ -663,6 +700,28 @@
             const temp = document.createElement('div');
             temp.textContent = str;
             return temp.innerHTML;
+        }
+
+        // PiP Controller
+        function togglePip(forceState) {
+            const win = document.getElementById('pip-window');
+            const frame = document.getElementById('pip-frame');
+            const isOpen = forceState !== undefined ? !forceState : win.style.display === 'block';
+
+            if (isOpen) {
+                win.style.display = 'none';
+                frame.src = '';
+                localStorage.setItem('mom_pip_open', 'false');
+            } else {
+                win.style.display = 'block';
+                frame.src = 'index.html';
+                localStorage.setItem('mom_pip_open', 'true');
+            }
+        }
+
+        // Auto-open PiP if was open previously
+        if (localStorage.getItem('mom_pip_open') === 'true') {
+            togglePip(true);
         }
     </script>
 </body>
