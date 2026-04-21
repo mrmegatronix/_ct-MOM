@@ -444,8 +444,7 @@
                             ${subtitle ? `<h2>${sanitize(subtitle)}</h2>` : ''}
                             ${slide.type === 'countdown' ? `
                                 <div class="countdown-container">
-                                    <div class="countdown-timer slide-countdown-timer">00 Days : 00 Hours : 00 Min</div>
-                                    <div class="countdown-label">Until Mother's Day 2026</div>
+                                    <div class="countdown-timer slide-countdown-timer">00 Days Left Until Mother's Day</div>
                                 </div>
                             ` : ''}
                             ${slide.type === 'qr' ? `
@@ -472,12 +471,9 @@
             const now = new Date();
             const diff = target - now;
             if (diff <= 0) return 'Happy Mother\'s Day!';
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hrs = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const mins = Math.floor((diff / (1000 * 60)) % 60);
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
             
-            const colon = '<span class="blink-colon">:</span>';
-            return `${days} Days ${colon} ${String(hrs).padStart(2, '0')} Hours ${colon} ${String(mins).padStart(2, '0')} Min`;
+            return `${days} Days Left Until Mother's Day`;
         }
         setInterval(() => {
             const el = document.querySelector('.slide-countdown-timer');
