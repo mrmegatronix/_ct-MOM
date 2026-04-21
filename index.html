@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.google.com https://*.googleusercontent.com https://*.firebaseio.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src *;">
     <title>Mother's Day Celebration - Coasters Tavern</title>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="config.js"></script>
@@ -281,7 +281,7 @@
             letter-spacing: 1px;
         }
     </style>
-    <script src="config.js"></script>
+
 </head>
 <body>
 
@@ -517,25 +517,42 @@
         }
 
         async function fetchAndApplySlides() {
-            const loadLocal = () => {
+            const loadLocal = async () => {
                 const stored = localStorage.getItem('mom_state');
                 if (stored) {
                     try {
                         const parsed = JSON.parse(stored);
                         if (parsed.slides && parsed.slides.length > 0) {
                             updateState({ slides: parsed.slides, disabledSlides: parsed.disabledSlides || [], overrides: parsed.overrides || {} });
+                            return true;
                         }
                     } catch(e) {}
                 }
+                
+                // Final fallback to the hardcoded local-backup.csv
+                try {
+                    const res = await fetch('local-backup.csv?t=' + Date.now());
+                    if (res.ok) {
+                        const csv = await res.text();
+                        const slides = parseSlidesCSV(csv);
+                        if (slides.length > 0) {
+                            updateState({ slides });
+                            return true;
+                        }
+                    }
+                } catch(e) {}
+                return false;
             };
 
             if (localStorage.getItem('mom_sync_locked') === 'true') {
                 console.log('[MOM] Sync skipped: Local CMS locked.');
-                if (state.slides.length === 0) loadLocal();
+                if (state.slides.length === 0) await loadLocal();
                 return;
             }
+
             const url = window.MOM_CONFIG.GSHEETS_URL;
             if(!url) return;
+            
             try {
                 const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
                 if (!res.ok) throw new Error("HTTP Error " + res.status);
@@ -549,8 +566,8 @@
             } catch (e) {
                 console.error('[MOM] Failed to fetch slides:', e);
                 if (state.slides.length === 0) {
-                    loadLocal();
-                    if (state.slides.length === 0) {
+                    const success = await loadLocal();
+                    if (!success) {
                         document.getElementById('slides-wrapper').innerHTML = 
                             `<div style="color:red; background:white; padding: 2rem; border-radius:10px; z-index:999; font-size:2rem; font-weight:bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
                                 ⚠️ Fetch Error:<br>${e.message}
