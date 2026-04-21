@@ -521,21 +521,46 @@
         }
 
         async function fetchAndApplySlides() {
+            const loadLocal = () => {
+                const stored = localStorage.getItem('mom_state');
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        if (parsed.slides && parsed.slides.length > 0) {
+                            updateState({ slides: parsed.slides, disabledSlides: parsed.disabledSlides || [], overrides: parsed.overrides || {} });
+                        }
+                    } catch(e) {}
+                }
+            };
+
             if (localStorage.getItem('mom_sync_locked') === 'true') {
                 console.log('[MOM] Sync skipped: Local CMS locked.');
+                if (state.slides.length === 0) loadLocal();
                 return;
             }
             const url = window.MOM_CONFIG.GSHEETS_URL;
             if(!url) return;
             try {
                 const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+                if (!res.ok) throw new Error("HTTP Error " + res.status);
                 const csv = await res.text();
                 const slides = parseSlidesCSV(csv);
                 if (slides.length > 0) {
                     updateState({ slides });
+                } else {
+                    throw new Error("No data in sheet");
                 }
             } catch (e) {
                 console.error('[MOM] Failed to fetch slides:', e);
+                if (state.slides.length === 0) {
+                    loadLocal();
+                    if (state.slides.length === 0) {
+                        document.getElementById('slides-wrapper').innerHTML = 
+                            `<div style="color:red; background:white; padding: 2rem; border-radius:10px; z-index:999; font-size:2rem; font-weight:bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                                ⚠️ Fetch Error:<br>${e.message}
+                            </div>`;
+                    }
+                }
             }
         }
 
