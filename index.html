@@ -429,7 +429,7 @@
                 const ov = overrides[slide.title] || {};
                 const title = ov.title || slide.title || '';
                 const subtitle = ov.subtitle || slide.subtitle || '';
-                const duration = ov.duration || slide.duration || 8000;
+                const duration = ov.duration || slide.duration || 30000;
 
                 const bgImg = safeUrl(slide.backgroundImage);
                 const overlayImg = safeUrl(slide.overlayImage);
@@ -462,7 +462,7 @@
             }).join('');
 
             const currentOv = overrides[visibleSlides[state.currentSlideIdx]?.title] || {};
-            const currentDur = currentOv.duration || visibleSlides[state.currentSlideIdx]?.duration || 8000;
+            const currentDur = currentOv.duration || visibleSlides[state.currentSlideIdx]?.duration || 30000;
             startSlideTimer(currentDur);
         }
 
@@ -512,7 +512,7 @@
                     title: clean[0],
                     subtitle: clean[1] || '',
                     type: (clean[2] || 'normal').toLowerCase(),
-                    duration: parseInt(clean[3]) || 8000,
+                    duration: parseInt(clean[3]) || 30000,
                     backgroundImage: clean[4] || '',
                     overlayImage: clean[5] || '',
                     bubbleText: clean[6] || ''
