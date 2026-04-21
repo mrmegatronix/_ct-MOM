@@ -50,7 +50,7 @@
             background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
             display: flex;
             justify-content: center;
-            z-index: 5;
+            z-index: 10000;
         }
         .floral-logo-container {
             width: 100%;
@@ -186,7 +186,21 @@
             font-size: clamp(1rem, 2vmin, 2rem);
             text-transform: uppercase;
             letter-spacing: 3px;
-            opacity: 0.7;
+            opacity: 0.8;
+            font-weight: 700;
+            color: var(--rose-red);
+        }
+        .reminder-label {
+            display: inline-block;
+            background: var(--rose-red);
+            color: white;
+            padding: 0.2rem 1rem;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         h1 {
@@ -201,19 +215,20 @@
 
         h2 {
             font-size: clamp(1.8rem, 5vmin, 4.5rem);
-            font-weight: 300;
+            font-weight: 700;
             margin: 1.5rem 0;
             color: var(--text-dark);
             max-width: 90%;
             text-wrap: balance;
             line-height: 1.3;
+            text-transform: uppercase;
         }
 
         .subtext {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             line-height: 1.6;
-            margin: 1rem 0;
-            font-weight: 400;
+            margin: 1.5rem 0;
+            font-weight: 600;
             color: var(--text-dark);
         }
 
@@ -451,7 +466,7 @@
                                 <div class="qr-container">
                                     <div class="qr-label">Scan to Book</div>
                                     <div class="qr-frame">
-                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.bubbleText || 'https://coasters.co.nz')}" alt="QR Code">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.bubbleText || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
                                     </div>
                                 </div>
                             ` : ''}
@@ -473,7 +488,7 @@
             if (diff <= 0) return 'Happy Mother\'s Day!';
             const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
             
-            return `${days} Days Left Until Mother's Day`;
+            return `<div class="reminder-label">Reminder</div> ${days} Days Until Mother's Day`;
         }
         setInterval(() => {
             const el = document.querySelector('.slide-countdown-timer');
@@ -497,13 +512,53 @@
             return parts;
         }
 
+        /**
+         * Robust CSV Parser handling multi-line fields (Shift+Enter from GSheets)
+         */
         function parseSlidesCSV(text) {
-            const rows = text.split(/\r?\n/).filter(line => line.trim());
-            if (rows.length < 2) return [];
+            const result = [];
+            let row = [];
+            let col = '';
+            let inQuotes = false;
 
-            return rows.slice(1).map(line => {
-                const parts = splitCSVLine(line);
-                const clean = parts.map(p => p.replace(/^"|"$/g, '').trim());
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i+1];
+
+                if (inQuotes) {
+                    if (char === '"' && nextChar === '"') {
+                        col += '"';
+                        i++;
+                    } else if (char === '"') {
+                        inQuotes = false;
+                    } else {
+                        col += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        row.push(col.trim());
+                        col = '';
+                    } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+                        if (char === '\r') i++;
+                        row.push(col.trim());
+                        result.push(row);
+                        row = [];
+                        col = '';
+                    } else {
+                        col += char;
+                    }
+                }
+            }
+            if (col || row.length > 0) {
+                row.push(col.trim());
+                result.push(row);
+            }
+
+            // Skip header and map to objects
+            return result.slice(1).map(parts => {
+                const clean = parts.map(p => p.replace(/\n/g, '<br>')); // Convert newlines to breaks for display
                 return {
                     title: clean[0],
                     subtitle: clean[1] || '',
@@ -587,9 +642,9 @@
             el.className = 'ambient-confetti';
             el.style.top = '-80px';
             el.style.left = Math.random() * 100 + '%';
-            el.style.fontSize = Math.random() * 1.5 + 1.5 + 'rem';
-            el.style.filter = 'drop-shadow(0 3px 8px rgba(0,0,0,0.15))';
-            el.style.opacity = Math.random() * 0.4 + 0.3;
+            el.style.fontSize = Math.random() * 1.2 + 1.8 + 'rem'; // 1.8 to 3.0rem
+            el.style.filter = 'drop-shadow(0 4px 10px rgba(0,0,0,0.2))';
+            el.style.opacity = Math.random() * 0.5 + 0.4; // More visible flow
 
             if (symbol === 'LOGO') {
                 const img = document.createElement('img');
@@ -602,12 +657,12 @@
                 el.innerText = symbol;
             }
 
-            const duration = Math.random() * 6 + 8;
+            const duration = Math.random() * 5 + 7; // Unified duration range
             el.style.transition = `transform ${duration}s linear`;
             confettiContainer.appendChild(el);
 
             setTimeout(() => {
-                el.style.transform = `translateY(120vh) rotate(${Math.random() * 360}deg)`;
+                el.style.transform = `translateY(120vh) rotate(${Math.random() * 720}deg)`;
             }, 50);
 
             setTimeout(() => el.remove(), duration * 1000 + 100);
