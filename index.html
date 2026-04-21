@@ -190,18 +190,6 @@
             font-weight: 700;
             color: var(--rose-red);
         }
-        .reminder-label {
-            display: inline-block;
-            background: var(--rose-red);
-            color: white;
-            padding: 0.2rem 1rem;
-            border-radius: 5px;
-            font-size: 1.2rem;
-            margin-right: 1rem;
-            vertical-align: middle;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
 
         h1 {
             font-family: 'Great Vibes', cursive;
@@ -455,8 +443,8 @@
                         ${bgImg ? '<div class="slide-image-overlay"></div>' : ''}
                         <div class="content" style="position: relative; z-index: 10;">
                             ${overlayImg ? `<img src="${overlayImg}" class="slide-overlay-img">` : ''}
-                            ${title ? `<h1>${sanitize(title)}</h1>` : ''}
-                            ${subtitle ? `<h2>${sanitize(subtitle)}</h2>` : ''}
+                            ${title ? `<h1>${sanitize(title).replace(/\n/g, '<br>')}</h1>` : ''}
+                            ${subtitle ? `<h2>${sanitize(subtitle).replace(/\n/g, '<br>')}</h2>` : ''}
                             ${slide.type === 'countdown' ? `
                                 <div class="countdown-container">
                                     <div class="countdown-timer slide-countdown-timer">00 Days Left Until Mother's Day</div>
@@ -488,7 +476,7 @@
             if (diff <= 0) return 'Happy Mother\'s Day!';
             const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
             
-            return `<div class="reminder-label">Reminder</div> ${days} Days Until Mother's Day`;
+            return `${days} Days Until Mother's Day`;
         }
         setInterval(() => {
             const el = document.querySelector('.slide-countdown-timer');
@@ -558,7 +546,7 @@
 
             // Skip header and map to objects
             return result.slice(1).map(parts => {
-                const clean = parts.map(p => p.replace(/\n/g, '<br>')); // Convert newlines to breaks for display
+                const clean = parts; // Keep original newlines for sanitization logic
                 return {
                     title: clean[0],
                     subtitle: clean[1] || '',

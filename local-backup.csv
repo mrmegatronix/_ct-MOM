@@ -1,6 +1,7 @@
-title,subtitle,type,duration,backgroundImage,overlayImage,bubbleText
-"Mother's Day Celebration","Join us for a beautiful Mother's Day Sunday at Coasters Tavern. Bookings essential.","reminder","30000","bg.png","","https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event"
-"MOM Countdown",,"countdown","30000","bg.png",,
-"Sunday Roast Specials","Our famous Sunday Roast with all the trimmings.
-Only $28 per person.","normal","30000","bg.png","",""
-"Book Your Table Now","Scan the QR code to secure your spot for Mother's Day lunch or dinner.","qr","30000","bg.png","","https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event"
+Title,Subtitle,Type,Duration,BackgroundImg,OverlayImg,BubbleText
+Reminder:,,countdown,30000,,,
+Don't forget about Mum!,Mother's Day is just around the corner...,normal,30000,,,
+Mum's Day Off?,We can help! Treat her to Lunch or Dinner,normal,30000,,,
+"Sunday, 10th May",Book your table today for lunch or dinner,normal,30000,,,
+How to Book?,Online from our website or Facebook.  <br> You can even book a table from your Coasters Loyalty App <br>  or just scan the code below:,normal,30000,,,
+Win a Hamper!,All Mum's dining here on Mother's Day will be put into the draw to win our Mother's Day Hamper! *conditions apply,normal,30000,,,
