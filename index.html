@@ -624,12 +624,11 @@
                 if (state.slides.length === 0) {
                     const success = await loadLocal();
                     if (!success) {
-                        updateState({ slides: [{
-                            title: "Happy Mother's Day",
-                            subtitle: "Celebrating the amazing women in our lives.",
-                            type: "normal",
-                            duration: 30000
-                        }] });
+                        updateState({ slides: [{ 
+                                title: "Loading...", 
+                                subtitle: "Please wait.",
+                                cta: ""
+                            }] });
                     }
                 }
             }
