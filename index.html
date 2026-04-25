@@ -624,10 +624,12 @@
                 if (state.slides.length === 0) {
                     const success = await loadLocal();
                     if (!success) {
-                        document.getElementById('slides-wrapper').innerHTML = 
-                            `<div style="color:red; background:white; padding: 2rem; border-radius:10px; z-index:999; font-size:2rem; font-weight:bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-                                ⚠️ Fetch Error:<br>${e.message}
-                            </div>`;
+                        updateState({ slides: [{
+                            title: "Happy Mother's Day",
+                            subtitle: "Celebrating the amazing women in our lives.",
+                            type: "normal",
+                            duration: 30000
+                        }] });
                     }
                 }
             }
