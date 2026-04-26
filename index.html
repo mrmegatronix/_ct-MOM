@@ -467,7 +467,7 @@
                                 <div class="qr-container">
                                     <div class="qr-label">Scan to Book</div>
                                     <div class="qr-frame">
-                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.qrCodeUrl || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.bubbleText || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
                                     </div>
                                 </div>
                             ` : ''}
@@ -567,9 +567,7 @@
                     duration: parseInt(clean[3]) || 30000,
                     backgroundImage: clean[4] || '',
                     overlayImage: clean[5] || '',
-                    qrCodeUrl: clean[6] || '',
-                    bubbleText: clean[7] || '',
-                    winnerPhotos: clean[8] || ''
+                    bubbleText: clean[6] || ''
                 };
             }).filter(s => s.title || s.subtitle);
         }
