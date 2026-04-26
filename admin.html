@@ -477,7 +477,7 @@
             }
         }
 
-        if (sessionStorage.getItem('mom_authed') === 'true') {
+        if (sessionStorage.getItem('mom_authed') === 'true' || sessionStorage.getItem('matrix_authed') === 'true') {
             document.getElementById('pin-overlay').style.display = 'none';
         }
 
