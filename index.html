@@ -569,7 +569,17 @@
                     overlayImage: clean[5] || '',
                     bubbleText: clean[6] || ''
                 };
-            }).filter(s => s.title || s.subtitle);
+            }).filter(s => {
+                if (!s.title && !s.subtitle) return false;
+                
+                // RUTHLESS TBC/TBA filtering
+                const scan = [s.title, s.subtitle, s.bubbleText].join(' ').toLowerCase();
+                if (scan.includes('tbc') || scan.includes('tba') || 
+                    scan.includes('to be confirmed') || scan.includes('to be announced')) {
+                    return false;
+                }
+                return true;
+            });
         }
 
         async function fetchAndApplySlides() {
