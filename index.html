@@ -217,7 +217,7 @@
         }
 
         h2 {
-            font-size: clamp(1.805rem, 3.61vw, 3.61rem);
+            font-size: clamp(1.769rem, 3.538vw, 3.538rem);
             font-weight: 700;
             margin: 1.5rem 0;
             color: var(--text-dark);
@@ -228,7 +228,7 @@
         }
 
         .subtext {
-            font-size: 1.5rem;
+            font-size: 1.47rem;
             line-height: 1.6;
             margin: 1.5rem 0;
             font-weight: 600;
@@ -403,7 +403,7 @@
         }
 
         .menu-sidebar h2 {
-            font-size: 1.625rem;
+            font-size: 1.59rem;
             color: var(--text-dark);
             text-transform: none;
             margin: 0;
@@ -632,7 +632,7 @@
                             
                             ${slide.type === 'countdown' ? `
                                 <div class="countdown-container">
-                                    <div class="countdown-timer slide-countdown-timer">00 DAYS</div>
+                                    <div class="countdown-timer slide-countdown-timer">00 DAYS LEFT UNTIL...</div>
                                 </div>
                             ` : ''}
 
@@ -694,7 +694,7 @@
             const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
             const dd = String(days).padStart(2, '0');
 
-            return `${dd} ${days === 1 ? 'DAY' : 'DAYS'}`;
+            return `${dd} ${days === 1 ? 'DAY' : 'DAYS'} LEFT UNTIL MOTHER'S DAY`;
         }
         setInterval(() => {
             const el = document.querySelector('.slide-countdown-timer');
