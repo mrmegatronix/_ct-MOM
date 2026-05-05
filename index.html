@@ -208,7 +208,7 @@
 
         h1 {
             font-family: 'Great Vibes', cursive;
-            font-size: clamp(6.5rem, 16vw, 15rem);
+            font-size: clamp(5.866rem, 14.44vw, 13.538rem);
             margin: 0;
             color: var(--rose-red);
             line-height: 1.0;
@@ -217,7 +217,7 @@
         }
 
         h2 {
-            font-size: clamp(2rem, 4vw, 4rem);
+            font-size: clamp(1.805rem, 3.61vw, 3.61rem);
             font-weight: 700;
             margin: 1.5rem 0;
             color: var(--text-dark);
@@ -318,7 +318,7 @@
         }
 
         .highlight {
-            font-size: 1.8rem;
+            font-size: 1.71rem;
             font-weight: 600;
             color: var(--rose-red);
             margin-top: 2rem;
@@ -373,13 +373,6 @@
             height: 180px;
         }
 
-        .qr-label {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--rose-red);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
 
         /* --- Menu Sidebar Layout --- */
         .menu-sidebar {
@@ -404,13 +397,13 @@
 
         .menu-sidebar h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 4.5rem;
+            font-size: 4.06rem;
             color: var(--rose-red);
             line-height: 1.1;
         }
 
         .menu-sidebar h2 {
-            font-size: 1.8rem;
+            font-size: 1.625rem;
             color: var(--text-dark);
             text-transform: none;
             margin: 0;
@@ -442,11 +435,6 @@
 <body>
 
     <div class="floral-bg"></div>
-    <div class="floral-top">
-        <div class="floral-logo-container">
-            <img src="coasters-logo.png" alt="Coasters Tavern Logo" class="pink-tint-white">
-        </div>
-    </div>
 
     <!-- Navigation Hub -->
     <nav id="nav-hub" style="position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border-top:1px solid rgba(168,28,46,0.2); padding:12px 20px; display:flex; justify-content:center; align-items:center; gap:20px; z-index:50000; transform:translateY(100%); transition:0.3s;" onmouseenter="this.style.transform='translateY(0)'" onmouseleave="this.style.transform='translateY(100%)'">
@@ -625,9 +613,8 @@
                                 ${subtitle ? `<h2>${sanitize(subtitle).replace(/\n/g, '<br>')}</h2>` : ''}
                                 
                                 <div class="qr-container" style="align-items: flex-start; margin-top: 1rem;">
-                                    <div class="qr-label" style="font-size: 0.9rem;">Scan to Book</div>
                                     <div class="qr-frame">
-                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.qrUrl || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&ecc=H&data=${encodeURIComponent(slide.qrUrl || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
                                     </div>
                                 </div>
                             </div>
@@ -645,14 +632,14 @@
                             
                             ${slide.type === 'countdown' ? `
                                 <div class="countdown-container">
-                                    <div class="countdown-timer slide-countdown-timer">00 Days Left Until Mother's Day</div>
+                                    <div class="countdown-timer slide-countdown-timer">00 DAYS</div>
                                 </div>
                             ` : ''}
 
                             ${slide.type === 'avatar' ? `
                                 <div class="avatar-container">
                                     ${(slide.bubbleText || '').trim() ? `<div class="speech-bubble">${sanitize(slide.bubbleText).replace(/\n/g, '<br>')}</div>` : ''}
-                                    <img src="${overlayImg || 'coasters-logo.png'}" class="animated-avatar">
+                                    <img src="${overlayImg || 'coasters-logo.png'}" class="animated-avatar pink-tint-white">
                                 </div>
                             ` : ''}
 
@@ -666,9 +653,8 @@
 
                             ${slide.type === 'qr' ? `
                                 <div class="qr-container">
-                                    <div class="qr-label">Scan to Book</div>
                                     <div class="qr-frame">
-                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.qrUrl || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&ecc=H&data=${encodeURIComponent(slide.qrUrl || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
                                     </div>
                                 </div>
                             ` : ''}
@@ -705,29 +691,10 @@
 
             if (diff <= 0) return "<span>Happy Mother's Day!</span>";
 
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((diff / 1000 / 60) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            const dd = String(days).padStart(2, '0');
 
-            return `
-                <div class="timer-segment">
-                    <span class="timer-value">${days}</span>
-                    <span class="timer-label">DAYS</span>
-                </div>
-                <div class="timer-segment">
-                    <span class="timer-value">${String(hours).padStart(2, '0')}</span>
-                    <span class="timer-label">HRS</span>
-                </div>
-                <div class="timer-segment">
-                    <span class="timer-value">${String(minutes).padStart(2, '0')}</span>
-                    <span class="timer-label">MIN</span>
-                </div>
-                <div class="timer-segment">
-                    <span class="timer-value">${String(seconds).padStart(2, '0')}</span>
-                    <span class="timer-label">SEC</span>
-                </div>
-            `;
+            return `${dd} ${days === 1 ? 'DAY' : 'DAYS'}`;
         }
         setInterval(() => {
             const el = document.querySelector('.slide-countdown-timer');
