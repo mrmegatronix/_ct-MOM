@@ -349,6 +349,7 @@
                     <option value="countdown">Countdown (May 10)</option>
                     <option value="qr">QR Code</option>
                     <option value="avatar">Avatar / Speech Bubble</option>
+                    <option value="winners">Winners Carousel</option>
                 </select>
             </div>
             <div class="form-group">
@@ -360,8 +361,16 @@
                 <input type="text" id="edit-overlay-img" placeholder="https://...">
             </div>
             <div class="form-group">
-                <label>Bubble Text / QR Data</label>
-                <textarea id="edit-bubble" rows="3" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;"></textarea>
+                <label>Bubble Text / Countdown Target</label>
+                <textarea id="edit-bubble" rows="2" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>QR URL (Custom)</label>
+                <input type="text" id="edit-qr-url" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Winner Photos (Comma Separated)</label>
+                <textarea id="edit-winner-photos" rows="2" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;" placeholder="url1, url2, ..."></textarea>
             </div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                 <button class="btn" style="flex: 1;" onclick="closeModal()">Cancel</button>
@@ -431,7 +440,7 @@
 
         <div class="section">
             <h3 style="margin: 0;">💡 GSheet Template Headers</h3>
-            <div class="template-box">Title, Subtitle, Type, Duration, BackgroundImg, OverlayImg, BubbleText</div>
+            <div class="template-box">Title, Subtitle, Type, Duration, BackgroundImg, OverlayImg, QrUrl, BubbleText, WinnerPhotos</div>
             <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 0.5rem;">Copy these headers to your Google Sheet to ensure correct mapping.</p>
         </div>
 
@@ -440,13 +449,18 @@
         </div>
         
         <!-- Navigation Hub -->
-        <nav class="nav-hub" style="margin-top: 1rem; display: flex; justify-content: center; gap: 20px; border-top: 1px solid var(--border); padding-top: 20px; flex-wrap: wrap;">
-            <a href="admin.html" class="nav-link" style="color: var(--rose-red); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--rose-red);">🛠 Admin</a>
+        <nav class="nav-hub" style="margin-top: 1rem; display: flex; justify-content: center; gap: 15px; border-top: 1px solid var(--border); padding-top: 20px; flex-wrap: wrap;">
+            <a href="admin.html" class="nav-link" style="color: var(--rose-red); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--rose-red);">🛠 Admin</a>
             <span style="color: var(--border)">|</span>
-            <a href="../_ct-MATRIX/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">MATRIX</a>
-            <a href="../_ct-MMR/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">MMR</a>
-            <a href="../__auto-dash/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Auto-Dash</a>
-            <a href="../__sec-DASH/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Sec-Dash</a>
+            <a href="../_ct-MATRIX/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Matrix</a>
+            <a href="../_ct-MMR/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">MMR</a>
+            <a href="../_ct-ACE/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">ACE</a>
+            <a href="../_ct-WEA/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">WEA</a>
+            <a href="../_ct-FIR/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">FIR</a>
+            <a href="../_ct-NIM/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">NIM</a>
+            <span style="color: var(--border)">|</span>
+            <a href="../__auto-dash/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Auto</a>
+            <a href="../__sec-DASH/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Sec</a>
         </nav>
     </div>
 
@@ -573,7 +587,9 @@
                 duration: 30000,
                 backgroundImage: '',
                 overlayImage: '',
-                bubbleText: ''
+                bubbleText: '',
+                qrUrl: '',
+                winnerPhotos: ''
             };
             state.slides.push(newSlide);
             localStorage.setItem('mom_state', JSON.stringify(state));
@@ -624,6 +640,8 @@
             document.getElementById('edit-bg-img').value = ov.backgroundImage || slide.backgroundImage || '';
             document.getElementById('edit-overlay-img').value = ov.overlayImage || slide.overlayImage || '';
             document.getElementById('edit-bubble').value = ov.bubbleText || slide.bubbleText || '';
+            document.getElementById('edit-qr-url').value = ov.qrUrl || slide.qrUrl || '';
+            document.getElementById('edit-winner-photos').value = ov.winnerPhotos || slide.winnerPhotos || '';
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -646,7 +664,9 @@
                 type: document.getElementById('edit-type').value,
                 backgroundImage: document.getElementById('edit-bg-img').value,
                 overlayImage: document.getElementById('edit-overlay-img').value,
-                bubbleText: document.getElementById('edit-bubble').value
+                bubbleText: document.getElementById('edit-bubble').value,
+                qrUrl: document.getElementById('edit-qr-url').value,
+                winnerPhotos: document.getElementById('edit-winner-photos').value
             };
 
             if (isLocked) {

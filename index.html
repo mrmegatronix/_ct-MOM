@@ -235,6 +235,88 @@
             color: var(--text-dark);
         }
 
+        /* Avatar styling */
+        .avatar-container {
+            margin-top: 1rem;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            max-height: 35vh;
+        }
+        .animated-avatar {
+            width: clamp(180px, 30vh, 280px);
+            height: clamp(180px, 30vh, 280px);
+            object-fit: contain;
+            border-radius: 50%;
+            border: 5px solid var(--rose-red);
+            box-shadow: 0 0 40px var(--cfg-glow), 0 0 80px rgba(0,0,0,0.1);
+            animation: floatMOM 4s ease-in-out infinite;
+            background: rgba(255,255,255,0.4);
+            backdrop-filter: blur(10px);
+        }
+        @keyframes floatMOM {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .speech-bubble {
+            position: absolute;
+            top: -60px;
+            right: -100px;
+            background: white;
+            color: var(--rose-red);
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px rgba(255,255,255,0.8);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            animation: float-bubbleMOM 4s ease-in-out infinite;
+            z-index: 10;
+            border: 2px solid var(--rose-red);
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 30px;
+            border-width: 15px 15px 0 0;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+        @keyframes float-bubbleMOM {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Winners Carousel */
+        .winners-carousel {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .winners-carousel img {
+            animation: winner-fadeMOM 10s infinite;
+            opacity: 0;
+            position: absolute;
+            height: 380px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 2rem;
+            border: 8px solid var(--rose-red);
+            box-shadow: 0 0 50px var(--cfg-glow);
+        }
+        @keyframes winner-fadeMOM {
+            0%, 10% { opacity: 0; transform: scale(0.9); }
+            15%, 85% { opacity: 1; transform: scale(1); }
+            90%, 100% { opacity: 0; transform: scale(1.1); }
+        }
+
         .highlight {
             font-size: 1.8rem;
             font-weight: 600;
@@ -522,7 +604,7 @@
                                 <div class="qr-container" style="align-items: flex-start; margin-top: 1rem;">
                                     <div class="qr-label" style="font-size: 0.9rem;">Scan to Book</div>
                                     <div class="qr-frame">
-                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.bubbleText || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.qrUrl || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
                                     </div>
                                 </div>
                             </div>
@@ -533,20 +615,37 @@
                 return `
                     <div class="slide ${i === state.currentSlideIdx ? 'active' : ''} ${panClass}" style="${bgStyle}" data-duration="${duration}">
                         ${bgImg ? '<div class="slide-image-overlay"></div>' : ''}
-                        <div class="content" style="position: relative; z-index: 10;">
+                        <div class="content">
                             ${overlayImg ? `<img src="${overlayImg}" class="slide-overlay-img">` : ''}
                             ${title ? `<h1>${sanitize(title).replace(/\n/g, '<br>')}</h1>` : ''}
-                            ${subtitle ? `<h2>${sanitize(subtitle).replace(/\n/g, '<br>')}</h2>` : ''}
+                            ${subtitle && slide.type !== 'avatar' ? `<h2>${sanitize(subtitle).replace(/\n/g, '<br>')}</h2>` : ''}
+                            
                             ${slide.type === 'countdown' ? `
                                 <div class="countdown-container">
                                     <div class="countdown-timer slide-countdown-timer">00 Days Left Until Mother's Day</div>
                                 </div>
                             ` : ''}
+
+                            ${slide.type === 'avatar' ? `
+                                <div class="avatar-container">
+                                    ${(slide.bubbleText || '').trim() ? `<div class="speech-bubble">${sanitize(slide.bubbleText).replace(/\n/g, '<br>')}</div>` : ''}
+                                    <img src="${overlayImg || 'coasters-logo.png'}" class="animated-avatar">
+                                </div>
+                            ` : ''}
+
+                            ${slide.type === 'winners' ? `
+                                <div class="winners-carousel">
+                                    ${(slide.winnerPhotos || '').split(',').map(url => url.trim()).filter(url => url).map((url, idx) => `
+                                        <img src="${safeUrl(url)}" style="animation-delay: ${idx * 2}s;">
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+
                             ${slide.type === 'qr' ? `
                                 <div class="qr-container">
                                     <div class="qr-label">Scan to Book</div>
                                     <div class="qr-frame">
-                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.bubbleText || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(slide.qrUrl || 'https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=dark&colors=hex,FFC0CB&date=2026-05-10&serviceids=event')}" alt="QR Code">
                                     </div>
                                 </div>
                             ` : ''}
@@ -561,14 +660,51 @@
         }
 
         // --- Countdown Logic ---
+        function getNZDate() {
+            const tz = 'Pacific/Auckland';
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone: tz,
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: 'numeric', minute: 'numeric', second: 'numeric',
+                hourCycle: 'h23'
+            }).formatToParts(new Date());
+            const v = {};
+            parts.forEach(p => v[p.type] = p.value);
+            return new Date(v.year, v.month - 1, v.day, v.hour, v.minute, v.second);
+        }
+
+        // --- Countdown Logic ---
         function calculateMOMCountdown() {
             const target = new Date('2026-05-10T00:00:00');
-            const now = new Date();
-            const diff = target - now;
-            if (diff <= 0) return 'Happy Mother\'s Day!';
-            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            const now = getNZDate();
             
-            return `${days} Days Until Mother's Day`;
+            const diff = target - now;
+
+            if (diff <= 0) return "<span>Happy Mother's Day!</span>";
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            return `
+                <div class="timer-segment">
+                    <span class="timer-value">${days}</span>
+                    <span class="timer-label">DAYS</span>
+                </div>
+                <div class="timer-segment">
+                    <span class="timer-value">${String(hours).padStart(2, '0')}</span>
+                    <span class="timer-label">HRS</span>
+                </div>
+                <div class="timer-segment">
+                    <span class="timer-value">${String(minutes).padStart(2, '0')}</span>
+                    <span class="timer-label">MIN</span>
+                </div>
+                <div class="timer-segment">
+                    <span class="timer-value">${String(seconds).padStart(2, '0')}</span>
+                    <span class="timer-label">SEC</span>
+                </div>
+            `;
         }
         setInterval(() => {
             const el = document.querySelector('.slide-countdown-timer');
@@ -603,62 +739,47 @@
 
             for (let i = 0; i < text.length; i++) {
                 const char = text[i];
-                const nextChar = text[i+1];
+                const nextChar = text[i + 1];
 
                 if (inQuotes) {
-                    if (char === '"' && nextChar === '"') {
-                        col += '"';
-                        i++;
-                    } else if (char === '"') {
-                        inQuotes = false;
-                    } else {
-                        col += char;
-                    }
+                    if (char === '"' && nextChar === '"') { col += '"'; i++; }
+                    else if (char === '"') { inQuotes = false; }
+                    else { col += char; }
                 } else {
-                    if (char === '"') {
-                        inQuotes = true;
-                    } else if (char === ',') {
-                        row.push(col.trim());
-                        col = '';
-                    } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+                    if (char === '"') { inQuotes = true; }
+                    else if (char === ',') { row.push(col.trim()); col = ''; }
+                    else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
                         if (char === '\r') i++;
                         row.push(col.trim());
                         result.push(row);
-                        row = [];
-                        col = '';
-                    } else {
-                        col += char;
-                    }
+                        row = []; col = '';
+                    } else { col += char; }
                 }
             }
-            if (col || row.length > 0) {
-                row.push(col.trim());
-                result.push(row);
-            }
+            if (col || row.length > 0) { row.push(col.trim()); result.push(row); }
 
-            // Skip header and map to objects
-            return result.slice(1).map(parts => {
-                const clean = parts; // Keep original newlines for sanitization logic
+            return result.slice(1).map(clean => {
+                const type = (clean[2] || 'normal').toLowerCase();
+                
+                // RUTHLESS TBC/TBA filtering
+                const scan = [clean[0], clean[1], clean[7], clean[8]].join(' ').toLowerCase();
+                if (scan.includes('tbc') || scan.includes('tba') || 
+                    scan.includes('to be confirmed') || scan.includes('to be announced')) {
+                    return null;
+                }
+
                 return {
-                    title: clean[0],
+                    title: clean[0] || '',
                     subtitle: clean[1] || '',
-                    type: (clean[2] || 'normal').toLowerCase(),
+                    type: type,
                     duration: parseInt(clean[3]) || 30000,
                     backgroundImage: clean[4] || '',
                     overlayImage: clean[5] || '',
-                    bubbleText: clean[6] || ''
+                    qrUrl: clean[6] || '',
+                    bubbleText: clean[7] || '',
+                    winnerPhotos: clean[8] || ''
                 };
-            }).filter(s => {
-                if (!s.title && !s.subtitle) return false;
-                
-                // RUTHLESS TBC/TBA filtering
-                const scan = [s.title, s.subtitle, s.bubbleText].join(' ').toLowerCase();
-                if (scan.includes('tbc') || scan.includes('tba') || 
-                    scan.includes('to be confirmed') || scan.includes('to be announced')) {
-                    return false;
-                }
-                return true;
-            });
+            }).filter(s => s !== null && (s.title || s.type === 'avatar' || s.type === 'winners'));
         }
 
         async function fetchAndApplySlides() {
