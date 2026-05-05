@@ -1,7 +1,33 @@
-Title,Subtitle,Type,Duration,BackgroundImg,OverlayImg,BubbleText
-Reminder:,,countdown,30000,,,
-Don't forget about Mum!,Mother's Day is just around the corner...,normal,30000,,,
-Mum's Day Off?,We can help! Treat her to Lunch or Dinner,normal,30000,,,
-Mother's Day Special:,3 Course Set Menu $50 pp,normal,20000,mothersdaymenu.jpg,,
-Mother's Day Set Menu,3 Course Set Menu $50 pp,normal,15000,mothersdaymenu.jpg,,
-Win a Hamper!,All Mum's dining here on Mother's Day will be put into the draw to win our Mother's Day Hamper! *conditions apply,normal,30000,,,
+Title,Subtitle,Type,Duration,BackgroundImage,OverlayImage,QR Code URL,BubbleText,WinnerPhotos
+Reminder:,,countdown,30000,,,,,
+Don't forget about Mum!,Mother's Day is just around the corner...,normal,30000,,,,,
+Mum's Day Off?,We can help! Treat her to Lunch or Dinner,normal,30000,,,,,
+"Sunday, 10th May",Book your table today for lunch or dinner,normal,30000,,,,,
+How to Book?,"Online from our Website or Facebook.  
+You can even book a table from your Coasters Loyalty App.",normal,30000,,,,,
+Win a Hamper!,"All Mum's dining here on Mother's Day 
+will go in the draw to win our 
+Mother's Day Hamper! ",normal,30000,,,,,
+Mother's Day Special:,3 Course Set Menu $50 pp,normal,20000,,,,,
+Entree,"SHARING PLATE
+Sharing plate of crumbed camembert w. plum sauce, chicken popper w. sriracha aioli & pumpkin and feta aranchini w. garlic aioli.",normal,30000,,,,,
+Choice of Main,"CREAMY ALA CHICKEN
+Grilled chicken w. house-made garlic inspired sauce, pumpkin mash & broccolini
+
+SALMON
+Grilled salmon w. lemon herb sauce, greens and roasted vegetables
+
+STEAK
+200g sirloin served medium rare served w. fries, slaw and your choice of red wine jus, garlic butter or mushroom sauce
+
+THAI SALAD
+Lettuce, mesclun, beetroot, carrot, crispy noodles, capsicum, red onion, honey roasted peanuts w. home-made Thai dressing. Your choice of beef, prawns or chicken
+",normal,30000,,,,,
+Dessert,"DESSERT SHARING PLATE
+A sharing selection of vanilla panna cotta, mini pavlova, chocolate brownie & cheesecake.",normal,30000,,,,,
+Mother's Day Set Menu,3 Course Set Menu $50 pp,normal,15000,,,,,
+*Conditions Apply,"
+Pre booked tables only, all diners of booking must be having the set menu.
+
+Bookings must be made before May 8th 2026.",normal,10000,,,,,
+Scan the code below to book your table now:,,qr,45000,,,"https://bookings.nowbookit.com/?accountid=d7034cd3-cfde-4556-a98c-ea943ec35ef4&venueid=13703&theme=light&colors=hex,000000&date=2026-05-10&serviceids=event",,
