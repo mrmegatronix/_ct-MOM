@@ -420,6 +420,22 @@
             width: 150px;
             height: 150px;
         }
+
+        /* Progress Bar */
+        #progress-container { position: fixed; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(0,0,0,0.1); z-index: 1000; }
+        #progress-bar { width: 0%; height: 100%; background: var(--rose-red); box-shadow: 0 0 20px var(--rose-red); transition: width 0.05s linear; }
+
+        /* Confetti Layer */
+        #confetti-container { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            z-index: 50; pointer-events: none; overflow: hidden; 
+        }
+        .ambient-confetti { position: absolute; z-index: 50; pointer-events: none; }
+        
+        /* Pink Tint Filter for Logos */
+        .pink-tint-white {
+            filter: drop-shadow(0 0 2px var(--rose-red)) brightness(0.8) sepia(1) hue-rotate(300deg) saturate(5);
+        }
     </style>
 
 </head>
@@ -428,10 +444,9 @@
     <div class="floral-bg"></div>
     <div class="floral-top">
         <div class="floral-logo-container">
-            <img src="coasters-logo.png" alt="Coasters Tavern Logo">
+            <img src="coasters-logo.png" alt="Coasters Tavern Logo" class="pink-tint-white">
         </div>
     </div>
-    <div id="confetti-container"></div>
 
     <!-- Navigation Hub -->
     <nav id="nav-hub" style="position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border-top:1px solid rgba(168,28,46,0.2); padding:12px 20px; display:flex; justify-content:center; align-items:center; gap:20px; z-index:50000; transform:translateY(100%); transition:0.3s;" onmouseenter="this.style.transform='translateY(0)'" onmouseleave="this.style.transform='translateY(100%)'">
@@ -450,6 +465,7 @@
         <!-- Slides are injected here by init() -->
     </div>
     <div id="progress-container"><div id="progress-bar"></div></div>
+    <div id="confetti-container"></div>
 
     <script>
         // --- Security Helpers ---
@@ -524,6 +540,13 @@
             
             slides[state.currentSlideIdx].classList.remove('active');
             state.currentSlideIdx = (state.currentSlideIdx + 1) % slides.length;
+            
+            // Re-check for updates at start of cycle
+            if (state.currentSlideIdx === 0) {
+                console.log('[MOM] Cycle complete. Re-checking for updates...');
+                fetchAndApplySlides();
+            }
+
             slides[state.currentSlideIdx].classList.add('active');
             
             const dur = parseInt(slides[state.currentSlideIdx].getAttribute('data-duration')) || 8000;
@@ -861,9 +884,10 @@
             if (symbol === 'LOGO') {
                 const img = document.createElement('img');
                 img.src = 'coasters-logo.png';
+                img.className = 'pink-tint-white';
                 img.style.width = '2.5rem';
                 img.style.height = 'auto';
-                img.style.opacity = '0.6';
+                img.style.opacity = '0.7';
                 el.appendChild(img);
             } else {
                 el.innerText = symbol;
@@ -894,6 +918,7 @@
                 if (symbol === 'LOGO') {
                     const img = document.createElement('img');
                     img.src = 'coasters-logo.png';
+                    img.className = 'pink-tint-white';
                     img.style.width = '3.5rem';
                     img.style.height = 'auto';
                     el.appendChild(img);
