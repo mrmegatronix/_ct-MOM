@@ -779,7 +779,7 @@
                     bubbleText: clean[7] || '',
                     winnerPhotos: clean[8] || ''
                 };
-            }).filter(s => s !== null && (s.title || s.type === 'avatar' || s.type === 'winners'));
+            }).filter(s => s !== null && (s.title || s.backgroundImage || s.overlayImage || s.type === 'avatar' || s.type === 'winners'));
         }
 
         async function fetchAndApplySlides() {
