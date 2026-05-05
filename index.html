@@ -107,6 +107,21 @@
             text-align: center;
             padding: 2rem;
             box-sizing: border-box;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Pan Down Effect */
+        .slide.pan-down {
+            background-size: 100% auto !important;
+            background-position: top center !important;
+            animation: panDownMOM 45s linear forwards;
+        }
+
+        @keyframes panDownMOM {
+            0% { background-position: top center; }
+            80% { background-position: bottom center; }
+            100% { background-position: bottom center; }
         }
 
         .slide.active {
@@ -449,10 +464,14 @@
 
                 const bgImg = safeUrl(slide.backgroundImage);
                 const overlayImg = safeUrl(slide.overlayImage);
-                const bgStyle = bgImg ? `background-image: url('${bgImg}'); background-size: cover; background-position: center;` : '';
+                const bgStyle = bgImg ? `background-image: url('${bgImg}');` : '';
                 
+                // Auto-detect if we should pan (if it's a menu image or type is MENU)
+                const shouldPan = bgImg && (bgImg.toLowerCase().includes('menu') || slide.type === 'menu');
+                const panClass = shouldPan ? 'pan-down' : '';
+
                 return `
-                    <div class="slide ${i === state.currentSlideIdx ? 'active' : ''}" style="${bgStyle}" data-duration="${duration}">
+                    <div class="slide ${i === state.currentSlideIdx ? 'active' : ''} ${panClass}" style="${bgStyle}" data-duration="${duration}">
                         ${bgImg ? '<div class="slide-image-overlay"></div>' : ''}
                         <div class="content" style="position: relative; z-index: 10;">
                             ${overlayImg ? `<img src="${overlayImg}" class="slide-overlay-img">` : ''}
