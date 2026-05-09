@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mother's Day - Admin Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        :root {
+            --rose-red: var(--cfg-primary, #A81C2E);
+            --soft-pink: var(--cfg-soft-pink, #FFF0F5);
+            --cream: var(--cfg-cream, #FFFAF0);
+            --text-dark: var(--cfg-text-dark, #4A0E0E);
+            --surface: #ffffff;
+            --border: rgba(168, 28, 46, 0.1);
+            --rose-red-light: rgba(168, 28, 46, 0.05);
+        }
+
+        body {
+            background-color: var(--cream);
+            color: var(--text-dark);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .admin-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 15px 45px rgba(168, 28, 46, 0.1);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Floral accents */
+        .admin-card::before {
+            content: '🌸';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 4rem;
+            opacity: 0.1;
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.5rem;
+            color: var(--rose-red);
+            margin: 0 0 0.5rem 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-dark);
+            opacity: 0.7;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .btn {
+            background: white;
+            border: 2px solid var(--rose-red);
+            color: var(--rose-red);
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: var(--rose-red);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(168, 28, 46, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--rose-red);
+            color: white;
+            grid-column: span 3;
+            margin-top: 0.5rem;
+        }
+
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Slide List */
+        .slide-list {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .slide-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            gap: 1rem;
+        }
+
+        .slide-item:last-child {
+            border-bottom: none;
+        }
+
+        .slide-info {
+            flex: 1;
+        }
+
+        .slide-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .slide-meta {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .slide-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 0.4rem;
+            border-radius: 8px;
+            border-width: 1px;
+            font-size: 0.7rem;
+            min-width: 30px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--rose-red);
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--rose-red);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        #status {
+            position: fixed;
+            top: 2rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            background: var(--rose-red);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(168, 28, 46, 0.3);
+            transform: translateY(-100px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        #status.show {
+            transform: translateY(0);
+        }
+
+        /* PIN Overlay */
+        #pin-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--cream);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .pin-input {
+            font-size: 2rem;
+            padding: 1rem;
+            width: 200px;
+            border: 2px solid var(--rose-red);
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+            background: white;
+            color: var(--rose-red);
+            letter-spacing: 0.5em;
+        }
+
+        .pin-input:focus {
+            outline: none;box-shadow: 0 0 20px rgba(168, 28, 46, 0.1);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
+        }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 20px; width: 90%; max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.3rem; opacity: 0.7; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;
+            font-family: inherit; box-sizing: border-box;
+        }
+
+        .template-box {
+            background: var(--rose-red-light);
+            border: 1px dashed var(--rose-red);
+            padding: 1rem;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            margin-top: 1rem;
+        }
+
+        /* PiP Styling */
+        .pip-toggle {
+            position: fixed; bottom: 30px; left: 30px; z-index: 5000;
+            background: var(--rose-red); color: white; border: none;
+            padding: 12px 24px; border-radius: 50px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(168, 28, 46, 0.3); font-size: 0.8rem;
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .pip-toggle:hover { transform: scale(1.05); }
+        .pip-window {
+            position: fixed; bottom: 90px; left: 30px; width: 350px; height: 200px;
+            background: #000; border: 2px solid var(--rose-red); border-radius: 15px;
+            z-index: 5000; overflow: hidden; display: none; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: pipIn 0.3s ease;
+        }
+        @keyframes pipIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .pip-window iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <div id="status">Status message</div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family:'Great Vibes'; color: var(--rose-red); font-size: 2.5rem; margin-top: 0;">Edit Slide</h2>
+            <input type="hidden" id="edit-index">
+            <div class="form-group">
+                <label>Title Override</label>
+                <input type="text" id="edit-title">
+            </div>
+            <div class="form-group">
+                <label>Subtitle Override</label>
+                <input type="text" id="edit-subtitle">
+            </div>
+            <div class="form-group">
+                <label>Duration (ms)</label>
+                <input type="number" id="edit-duration">
+            </div>
+            <div class="form-group">
+                <label>Slide Type</label>
+                <select id="edit-type" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                    <option value="normal">Normal</option>
+                    <option value="countdown">Countdown (May 10)</option>
+                    <option value="qr">QR Code</option>
+                    <option value="avatar">Avatar / Speech Bubble</option>
+                    <option value="winners">Winners Carousel</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Background Image URL</label>
+                <input type="text" id="edit-bg-img" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Overlay Image URL</label>
+                <input type="text" id="edit-overlay-img" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Bubble Text / Countdown Target</label>
+                <textarea id="edit-bubble" rows="2" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>QR URL (Custom)</label>
+                <input type="text" id="edit-qr-url" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Winner Photos (Comma Separated)</label>
+                <textarea id="edit-winner-photos" rows="2" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;" placeholder="url1, url2, ..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn" style="flex: 1;" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" style="flex: 1;" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Access -->
+    <div id="pin-overlay">
+        <h1>Admin Access</h1>
+        <p class="subtitle">Secure Entrance</p>
+        <input type="password" class="pin-input" id="pin-input" maxlength="4" placeholder="••••">
+        <button class="btn btn-primary" style="width: 200px;" onclick="checkPin()">Unlock Panel</button>
+        <p id="pin-error" style="color: var(--rose-red); font-size: 0.8rem; margin-top: 1rem; display: none;">Invalid PIN. Try again.</p>
+    </div>
+
+    <div class="admin-card">
+        <h1>Mother's Day</h1>
+        <div class="subtitle">Admin Control Panel</div>
+
+        <div class="section" style="background: var(--rose-red-light); padding: 1rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 0.9rem; font-weight: 600;">🔒 Lock Local Edits (Stop Sync)</div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="sync-lock-toggle" onchange="toggleSyncLock()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="section">
+            <h3>🎮 Slide Navigation</h3>
+            <div class="btn-group">
+                <button class="btn" onclick="sendCommand('prev')">
+                    <span class="btn-icon">⏮</span>
+                    <span>Previous</span>
+                </button>
+                <button class="btn" onclick="sendCommand('toggle')" id="play-pause-btn">
+                    <span class="btn-icon">⏸</span>
+                    <span id="play-pause-text">Pause</span>
+                </button>
+                <button class="btn" onclick="sendCommand('next')">
+                    <span class="btn-icon">⏭</span>
+                    <span>Next</span>
+                </button>
+                <button class="btn btn-primary" onclick="bc.postMessage({type: 'CONFETTI'})">
+                    <span class="btn-icon">🌸</span>
+                    <span>Trigger Flower Burst</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0;">📋 Slide Management</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-sm" onclick="addNewSlide()" style="background: var(--rose-red); color: white;">+ ADD SLIDE</button>
+                    <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.7rem;" id="sync-btn" onclick="syncFromSheets()">🔄 SYNC NOW</button>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; opacity: 0.6; margin-bottom: 1rem;">Click ✏️ to override values locally for this browser session.</div>
+            <div class="slide-list" id="slide-list">
+                <!-- Slides will be listed here -->
+                <div style="padding: 2rem; text-align: center; opacity: 0.5;">Loading slides...</div>
+            </div>
+            <button class="btn btn-primary" onclick="saveVisibility()" style="margin-top: 1rem;">💾 Apply Changes to Display</button>
+        </div>
+
+        <div class="section">
+            <h3 style="margin: 0;">💡 GSheet Template Headers</h3>
+            <div class="template-box">Title, Subtitle, Type, Duration, BackgroundImg, OverlayImg, QrUrl, BubbleText, WinnerPhotos</div>
+            <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 0.5rem;">Copy these headers to your Google Sheet to ensure correct mapping.</p>
+        </div>
+
+        <div class="section" style="text-align: center;">
+            <a href="index.html" target="_blank" style="color: var(--rose-red); text-decoration: none; font-size: 0.8rem; font-weight: 600;">Open TV Display ↗</a>
+        </div>
+        
+        <!-- Navigation Hub -->
+        <nav class="nav-hub" style="margin-top: 1rem; display: flex; justify-content: center; gap: 15px; border-top: 1px solid var(--border); padding-top: 20px; flex-wrap: wrap;">
+            <a href="admin.html" class="nav-link" style="color: var(--rose-red); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--rose-red);">🛠 Admin</a>
+            <span style="color: var(--border)">|</span>
+            <a href="../_ct-MATRIX/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Matrix</a>
+            <a href="../_ct-MMR/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">MMR</a>
+            <a href="../_ct-ACE/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">ACE</a>
+            <a href="../_ct-WEA/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">WEA</a>
+            <a href="../_ct-FIR/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">FIR</a>
+            <a href="../_ct-NIM/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">NIM</a>
+            <span style="color: var(--border)">|</span>
+            <a href="../__auto-dash/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Auto</a>
+            <a href="../__sec-DASH/index.html" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Sec</a>
+        </nav>
+    </div>
+
+    <!-- PiP Elements -->
+    <div id="pip-window" class="pip-window">
+        <iframe id="pip-frame" src=""></iframe>
+    </div>
+    <button class="pip-toggle" onclick="togglePip()">
+        <span style="font-size: 1.2rem;">🖼️</span> 
+        <span>LIVE PREVIEW</span>
+    </button>
+
+    <script>
+        const bc = new BroadcastChannel('mom_sync');
+        let isPaused = false;
+
+        // Security
+        function checkPin() {
+            const input = document.getElementById('pin-input');
+            const stored = localStorage.getItem('mom_pin') || '1234';
+            if (input.value === stored) {
+                document.getElementById('pin-overlay').style.display = 'none';
+                sessionStorage.setItem('mom_authed', 'true');
+            } else {
+                document.getElementById('pin-error').style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        if (sessionStorage.getItem('mom_authed') === 'true' || sessionStorage.getItem('matrix_authed') === 'true') {
+            document.getElementById('pin-overlay').style.display = 'none';
+        }
+
+        // Messaging
+        function sendCommand(cmd) {
+            bc.postMessage({ type: 'SLIDE_CMD', payload: { cmd } });
+            if (cmd === 'toggle') {
+                isPaused = !isPaused;
+                document.getElementById('play-pause-text').innerText = isPaused ? 'Resume' : 'Pause';
+                document.getElementById('play-pause-btn').querySelector('.btn-icon').innerText = isPaused ? '▶' : '⏸';
+            }
+            showStatus('Command Sent: ' + cmd);
+        }
+
+        function showStatus(msg) {
+            const el = document.getElementById('status');
+            el.innerText = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
+        // Sync and Management
+        function toggleSyncLock() {
+            const locked = document.getElementById('sync-lock-toggle').checked;
+            localStorage.setItem('mom_sync_locked', locked);
+            document.getElementById('sync-btn').disabled = locked;
+            document.getElementById('sync-btn').style.opacity = locked ? '0.3' : '1';
+            showStatus(locked ? 'Mode: LOCAL CMS' : 'Mode: CLOUD SYNC');
+        }
+
+        async function syncFromSheets() {
+            if (localStorage.getItem('mom_sync_locked') === 'true') return;
+            showStatus('Fetching latest from Sheets...');
+            const url = window.MOM_CONFIG.GSHEETS_URL;
+            try {
+                const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+                const csv = await res.text();
+                // We'll reuse the parsing logic here or just tell index to refresh
+                bc.postMessage({ type: 'CONFETTI' }); // feedback
+                showStatus('Sync successful! Refreshing list...');
+                // Give index.html a moment to fetch if it was also open, or just trigger it
+                setTimeout(renderSlideList, 1000);
+            } catch (e) {
+                showStatus('Error: Failed to sync');
+            }
+        }
+
+        function renderSlideList() {
+            const stored = localStorage.getItem('mom_state');
+            if (!stored) return;
+            const state = JSON.parse(stored);
+            const container = document.getElementById('slide-list');
+            const disabled = state.disabledSlides || [];
+            const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
+
+            container.innerHTML = state.slides.map((s, i) => {
+                const ov = overrides[s.title] || {};
+                const displayTitle = ov.title || s.title || '(No Title)';
+                
+                return `
+                    <div class="slide-item">
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <button class="btn-sm" onclick="moveSlide(${i}, -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
+                            <button class="btn-sm" onclick="moveSlide(${i}, 1)" ${i === state.slides.length - 1 ? 'disabled' : ''}>▼</button>
+                        </div>
+                        <div class="slide-info">
+                            <div class="slide-title">
+                                ${sanitize(displayTitle)}
+                                ${ov.title ? '<span style="color:var(--rose-red); font-size:0.6rem;">(EDITED)</span>' : ''}
+                            </div>
+                            <div class="slide-meta">${ov.type || s.type} • ${ov.duration || s.duration}ms</div>
+                        </div>
+                        <div class="slide-actions">
+                            <button class="btn btn-sm" onclick="openEdit(${i})" title="Edit">✏️</button>
+                            <button class="btn btn-sm" onclick="deleteSlide(${i})" title="Delete" style="color: red; border-color: rgba(255,0,0,0.2);">🗑️</button>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="check-${i}" value="${s.title}" ${disabled.includes(s.title) ? '' : 'checked'}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addNewSlide() {
+            const stored = localStorage.getItem('mom_state');
+            const state = stored ? JSON.parse(stored) : { slides: [] };
+            const newSlide = {
+                title: 'New Slide ' + (state.slides.length + 1),
+                subtitle: 'Enter subtitle here',
+                type: 'normal',
+                duration: 30000,
+                backgroundImage: '',
+                overlayImage: '',
+                bubbleText: '',
+                qrUrl: '',
+                winnerPhotos: ''
+            };
+            state.slides.push(newSlide);
+            localStorage.setItem('mom_state', JSON.stringify(state));
+            renderSlideList();
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            showStatus('New slide added locally!');
+            openEdit(state.slides.length - 1);
+        }
+
+        function deleteSlide(index) {
+            if (!confirm('Are you sure you want to delete this slide locally?')) return;
+            const state = JSON.parse(localStorage.getItem('mom_state'));
+            state.slides.splice(index, 1);
+            localStorage.setItem('mom_state', JSON.stringify(state));
+            renderSlideList();
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            showStatus('Slide deleted!');
+        }
+
+        function moveSlide(index, direction) {
+            const stored = localStorage.getItem('mom_state');
+            if (!stored) return;
+            const state = JSON.parse(stored);
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= state.slides.length) return;
+            
+            const item = state.slides.splice(index, 1)[0];
+            state.slides.splice(newIndex, 0, item);
+            
+            localStorage.setItem('mom_state', JSON.stringify(state));
+            renderSlideList();
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            showStatus('Slide order updated!');
+        }
+
+        // Editing Logic
+        function openEdit(index) {
+            const state = JSON.parse(localStorage.getItem('mom_state'));
+            const slide = state.slides[index];
+            const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
+            const ov = overrides[slide.title] || {};
+
+            document.getElementById('edit-index').value = index;
+            document.getElementById('edit-title').value = ov.title || slide.title || '';
+            document.getElementById('edit-subtitle').value = ov.subtitle || slide.subtitle || '';
+            document.getElementById('edit-duration').value = ov.duration || slide.duration || 30000;
+            document.getElementById('edit-type').value = ov.type || slide.type || 'normal';
+            document.getElementById('edit-bg-img').value = ov.backgroundImage || slide.backgroundImage || '';
+            document.getElementById('edit-overlay-img').value = ov.overlayImage || slide.overlayImage || '';
+            document.getElementById('edit-bubble').value = ov.bubbleText || slide.bubbleText || '';
+            document.getElementById('edit-qr-url').value = ov.qrUrl || slide.qrUrl || '';
+            document.getElementById('edit-winner-photos').value = ov.winnerPhotos || slide.winnerPhotos || '';
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        function saveEdit() {
+            const index = document.getElementById('edit-index').value;
+            const state = JSON.parse(localStorage.getItem('mom_state'));
+            const slide = state.slides[index];
+            
+            // To make this robust, we actually update the slide object itself if Sync is locked
+            const isLocked = localStorage.getItem('mom_sync_locked') === 'true';
+            
+            const newValues = {
+                title: document.getElementById('edit-title').value,
+                subtitle: document.getElementById('edit-subtitle').value,
+                duration: parseInt(document.getElementById('edit-duration').value),
+                type: document.getElementById('edit-type').value,
+                backgroundImage: document.getElementById('edit-bg-img').value,
+                overlayImage: document.getElementById('edit-overlay-img').value,
+                bubbleText: document.getElementById('edit-bubble').value,
+                qrUrl: document.getElementById('edit-qr-url').value,
+                winnerPhotos: document.getElementById('edit-winner-photos').value
+            };
+
+            if (isLocked) {
+                // Persistent edit to the slide itself
+                state.slides[index] = { ...slide, ...newValues };
+                localStorage.setItem('mom_state', JSON.stringify(state));
+                bc.postMessage({ type: 'STATE_UPDATE', payload: { slides: state.slides } });
+            } else {
+                // Session override
+                const overrides = JSON.parse(localStorage.getItem('mom_overrides') || '{}');
+                overrides[slide.title] = newValues;
+                localStorage.setItem('mom_overrides', JSON.stringify(overrides));
+                bc.postMessage({ type: 'STATE_UPDATE', payload: { overrides } });
+            }
+            
+            closeModal();
+            renderSlideList();
+            showStatus(isLocked ? 'Slide updated permanently!' : 'Slide overridden locally!');
+        }
+
+        function saveVisibility() {
+            const boxes = document.querySelectorAll('.slide-item input[type="checkbox"]');
+            const disabled = [];
+            boxes.forEach(box => {
+                if (!box.checked) disabled.push(box.value);
+            });
+
+            const stored = localStorage.getItem('mom_state');
+            let state = stored ? JSON.parse(stored) : {};
+            state.disabledSlides = disabled;
+            localStorage.setItem('mom_state', JSON.stringify(state));
+
+            bc.postMessage({ type: 'STATE_UPDATE', payload: { disabledSlides: disabled } });
+            showStatus('Visibility Applied to Display!');
+        }
+
+        // Initial render
+        const locked = localStorage.getItem('mom_sync_locked') === 'true';
+        document.getElementById('sync-lock-toggle').checked = locked;
+        document.getElementById('sync-btn').disabled = locked;
+        document.getElementById('sync-btn').style.opacity = locked ? '0.3' : '1';
+
+        renderSlideList();
+        setInterval(() => {
+            if (localStorage.getItem('mom_sync_locked') !== 'true') {
+                renderSlideList();
+            }
+        }, 5000);
+
+        function sanitize(str) {
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        }
+
+        // PiP Controller
+        function togglePip(forceState) {
+            const win = document.getElementById('pip-window');
+            const frame = document.getElementById('pip-frame');
+            const isOpen = forceState !== undefined ? !forceState : win.style.display === 'block';
+
+            if (isOpen) {
+                win.style.display = 'none';
+                frame.src = '';
+                localStorage.setItem('mom_pip_open', 'false');
+            } else {
+                win.style.display = 'block';
+                frame.src = 'index.html';
+                localStorage.setItem('mom_pip_open', 'true');
+            }
+        }
+
+        // Auto-open PiP if was open previously
+        if (localStorage.getItem('mom_pip_open') === 'true') {
+            togglePip(true);
+        }
+    </script>
+</body>
+</html>
