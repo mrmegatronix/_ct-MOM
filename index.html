@@ -537,7 +537,7 @@
 
             slides[state.currentSlideIdx].classList.add('active');
             
-            const dur = parseInt(slides[state.currentSlideIdx].getAttribute('data-duration')) || 8000;
+            const dur = parseInt(slides[state.currentSlideIdx].getAttribute('data-duration')) || 30000;
             startSlideTimer(dur);
             createConfettiBurst();
         }
